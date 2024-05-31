@@ -1,0 +1,48 @@
+<odoo>
+    <data>
+        <!-- Template que hereda del reporte de vale de entrega y agrega el peso de la caja -->
+        <template id="stock_report_delivery_package_section_line_inherit" inherit_id="stock.stock_report_delivery_package_section_line">
+            <xpath expr="//td[@name='package_info']" position="replace">
+                <td colspan="2" name="package_info">
+                    <span t-field="package.name"/>
+                </td>
+                <td name="package_weight" style="text-align: center !important;">
+                    <span t-field="package.package_weight"/>
+                    <span>Kg</span>
+                </td>
+            </xpath>
+        </template>
+        <!-- Template que hereda del reporte de vale de entrega y agrega el total de productos (Para el caso en que se haya empaquetado) -->
+        <template id="report_delivery_document_inherit" inherit_id="stock.report_delivery_document">
+            <xpath expr="//table[@name='stock_move_line_table']/tbody" position="after">
+                    <tfoot>
+                        <tr t-att-class="'bg-300 fw-bold o_line_section'">
+                            <td colspan="2">
+                               <span>Total Productos</span> 
+                            </td>
+                            <td style="text-align: center !important;">
+                                <span t-field="o.total_order"/>
+                                <span>Unidades</span>
+                            </td>
+                        </tr>
+                    </tfoot>
+            </xpath>
+        </template>
+        <!-- Template que hereda del reporte de vale de entrega y agrega el total de productos (Para el caso en que no se haya empaquetado) -->
+        <template id="stock_move_table_inherit" inherit_id="stock.report_delivery_document">
+            <xpath expr="//table[@name='stock_move_table']/tbody" position="after">
+                    <tfoot>
+                        <tr t-att-class="'bg-300 fw-bold o_line_section'">
+                            <td colspan="2">
+                               <span>Total Productos</span> 
+                            </td>
+                            <td style="text-align: center !important;">
+                                <span t-field="o.total_order"/>
+                                <span>Unidades</span>
+                            </td>
+                        </tr>
+                    </tfoot>
+            </xpath>
+        </template>
+    </data>
+</odoo>

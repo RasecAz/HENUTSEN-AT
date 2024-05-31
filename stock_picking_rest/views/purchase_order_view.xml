@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <data>
+        <record id="purchase_order_form_view_inherit" model="ir.ui.view">
+            <field name="name">purchase.order.form.inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header/button[@name='confirm_reminder_mail']" position="replace">
+                    <field name="company_id" invisible="1"/>
+                </xpath>
+                <xpath expr="//sheet/notebook/page/field/tree/field[@name='product_qty']" position="replace">
+                    <field name="stock_state" invisible="1"/>
+                    <field name="product_qty" decoration-danger="stock_state == 'not_available'" decoration-warning="stock_state == 'in_zero'" decoration-success="stock_state == 'available'"/>
+                </xpath>
+                <xpath expr="//sheet/notebook/page/field/tree/field[@name='price_unit']" position="replace">
+                    <field name="price_unit" column_invisible="True"/>
+                    <field name="stock_in_warehouse" readonly="1"/>
+                    <field name="price_in_pricelist" readonly="1"/>
+                </xpath>
+                <xpath expr="//sheet/notebook/page/field/tree/field[@name='taxes_id']" position="replace">
+                    <field name="taxes_id" column_invisible="True"/>
+                </xpath>
+                <xpath expr="//sheet/notebook/page/field/tree/field[@name='price_subtotal']" position="replace">
+                    <field name="price_subtotal" column_invisible="True"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+
+</odoo>
