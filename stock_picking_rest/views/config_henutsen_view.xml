@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- FORM -->
+    <record id="config_henutsen_form_view" model="ir.ui.view">
+        <field name="name">config.henutsen.view</field>
+        <field name="model">config.henutsen</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                    <button string='Guardar' name="save_data" type="object" class="btn-primary" invisible="state == 'done'"/>
+                    <button string='Actualizar Bearer' name="get_bearer" type="object" class="btn-primary"/>
+                    <button string='Modificar Info' name="modify_config" type="object" class="btn" invisible="state == 'draft'"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Guardado" bg_color="text-bg-info" invisible="state == 'draft'"/>
+                    <div class="oe_title" colspan="4">
+                        <h1>Configuración de parámetros Webservice Henutsen</h1>
+                    </div>
+                    <group>
+                        <field name="last_update" />
+                        <field name="url_bearer" readonly="state == 'done'" />
+                        <field name="url_picking" readonly="state == 'done'" />
+                        <field name="url_packing" readonly="state == 'done'" />
+                        <field name="url_adjustment" readonly="state == 'done'" />
+                        <field name="email_henutsen" readonly="state == 'done'" />  
+                        <field name="api_key" readonly="state == 'done'" />
+                        <field name="bearer_token" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- ACTION -->
+    <record id="action_config_henutsen" model="ir.actions.act_window">
+        <field name="name">Ajustes Henutsen</field>
+        <field name="res_model">config.henutsen</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="config_henutsen_form_view"/>
+        <field name="target">current</field>
+    </record>
+
+    <!-- MENÚ -->
+    <menuitem 
+        id="config_henutsen_menu" 
+        name="Ajustes Henutsen" 
+        parent="stock.menu_stock_config_settings" 
+        action="action_config_henutsen"
+        sequence="-1"/>
+
+
+
+</odoo>

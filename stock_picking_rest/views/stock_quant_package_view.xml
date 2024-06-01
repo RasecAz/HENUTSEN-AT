@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="stock_quant_package_inherit_view" model="ir.ui.view">
+        <field name="name">stock.quant.package.inherit.view</field>
+        <field name="model">stock.quant.package</field>
+        <field name="inherit_id" ref="stock.view_quant_package_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='pack_date']" position="after">
+                <field name="package_weight" />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
