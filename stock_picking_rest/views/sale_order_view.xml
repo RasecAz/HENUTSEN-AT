@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_sale_order_form_inherit" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header/field[@name='state']" position="replace">
+                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,pending,sale"/>
+                    <field name="button_confirm_invisible" invisible="1" />
+                    <field name="button_approve_invisible" invisible="1" />
+                </xpath>
+                <xpath expr="(//header/button[@name='action_confirm'])[1]" position="replace">
+                    <button name="action_confirm" id="action_confirm" data-hotkey="q" string="Confirmar" class="btn-primary" type="object" context="{'validate_analytic': True}" invisible="1"/>
+                </xpath>
+                <xpath expr="(//header/button[@name='action_confirm'])[2]" position="replace">
+                    <button name="action_confirm" data-hotkey="q" string="Confirmar" type="object" context="{'validate_analytic': True}" invisible="button_confirm_invisible"/>
+                    <button name="action_approve" string="Solicitar Aprobación" type="object" invisible="button_approve_invisible"/>
+                </xpath>
+                <xpath expr="//notebook/page/field[@name='order_line']" position="attributes">
+                    <attribute name="readonly">state in ['cancel', 'pending'] or locked</attribute>
+                </xpath>
+                <xpath expr="//header/button[@name='action_cancel']" position="attributes">
+                    <attribute name="invisible">state not in ['draft', 'sent', 'sale', 'pending'] or not id or locked</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+
+
+</odoo>

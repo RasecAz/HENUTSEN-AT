@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="stock_picking_inherit" model="ir.ui.view">
+        <field name="name">model.name.view.form.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <field name="rfid_response" invisible="1"/>
+            </xpath>
+            <xpath expr="//sheet/div[@name='button_box']" position="before">
+                <widget name="web_ribbon" title="Enviado a Henutsen" bg_color="text-bg-info" invisible="rfid_response != 'SUCCESS'"/>
+            </xpath>
+            <xpath expr='//notebook' position="inside">
+                <page name="conectionpage" string="Conexión Henutsen" groups="base.group_no_one">
+                    <group>
+                        <field name="api_key" />
+                        <field name="bearer" />
+                        <field name="json_generado" />
+                        <field name="endpoint" />
+                        <field name="rfid_response" />
+                        <field name="response" />
+                    </group>
+                </page>
+            </xpath>
+            <xpath expr="//button[@name='button_validate']" position="after">
+                <field name="send_button_visible" invisible="1"/>
+                <field name="cg1_button_visible" invisible="1"/>
+                <field name="packing_button_visible" invisible="1"/>
+                <button name="send_picking_to_henutsen" invisible="not send_button_visible" string="Generar códigos RFID en Henutsen" type="object" class="oe_highlight"/>
+                <button name="generate_download_cg1" invisible="not cg1_button_visible" string="Descarga JSON CG1" type="object" class="oe_highlight"/>
+                <button name="send_packing_to_henutsen" invisible="not packing_button_visible" string="Enviar a verificación RFID Henutsen" type="object" class="oe_highlight"/>          
+            </xpath>
+            <xpath expr="//group[@name='other_infos']" position="inside">
+                <field name="total_order" invisible="state != 'done'" />
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
