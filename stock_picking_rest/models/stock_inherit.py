@@ -119,7 +119,7 @@ class StockInherit(models.Model):
 
     # INFO: Método que genera el json a CG1 al validar la orden de salida
     def _cg1_json_generator(self):
-        cg1_detalle = []
+        cg1_detalle = {}
         fecha_operacion = str(self.date.strftime("%Y-%m-%d"))
         es_sucursal = False
         lista_precio = self.sale_id.pricelist_id.name
@@ -142,31 +142,36 @@ class StockInherit(models.Model):
             precio_producto = None
             for item in items_lista.item_ids:
                 if item.product_tmpl_id.name == producto.product_id.name:
-                    precio_producto = item.fixed_price
+                    precio_producto = int(round(item.fixed_price))
             if not precio_producto:
-                raise ValidationError("No se encontró el precio del producto en la lista de precios, verifique la configuración de la lista.")
-            cg1_detalle.append({
-                "CMPETRM_IND_ITEMS": "I",
-                "CMPETRM_ITEMS": referencia_producto,
-                "CMPETRM_UNIMED_CAP": "UND",
-                "CMPETRM_CANT_PED_1": str(cantidad_producto),
-                "CMPETRM_IND_UNIDAD": "1",
-                "CMPETRM_LIPRE": lista_precio,
-                "CMPETRM_PRECIO_UNI": str(precio_producto),
-                "CMPETRM_FECHA": fecha_operacion,
-                "CMPETRM_VENDEDOR": nit_vendedor,
-                "CMPETRM_MOTIVO": "01"
-            })    
+                precio_producto = 0
+            if cantidad_producto != 0:
+                if referencia_producto in cg1_detalle:
+                    suma = float(cg1_detalle[referencia_producto]["CMPETRM_CANT_PED_1"]) + cantidad_producto
+                    cg1_detalle[referencia_producto]["CMPETRM_CANT_PED_1"] = str(int(round(suma)))
+                else:
+                    cg1_detalle[referencia_producto] = {
+                        "CMPETRM_IND_ITEMS": "I",
+                        "CMPETRM_ITEMS": referencia_producto,
+                        "CMPETRM_UNIMED_CAP": "UND",
+                        "CMPETRM_CANT_PED_1": str(int(cantidad_producto)),
+                        "CMPETRM_IND_UNIDAD": "1",
+                        "CMPETRM_LIPRE": lista_precio,
+                        "CMPETRM_PRECIO_UNI": str(precio_producto),
+                        "CMPETRM_FECHA": fecha_operacion,
+                        "CMPETRM_VENDEDOR": nit_vendedor.split("-")[0],
+                        "CMPETRM_MOTIVO": "01"
+                    }
 
         cg1_json = json.dumps({
-            "CMPETRM_OC_NRO": self.name.replace("Arist/OUT/", "Odoo-"),
+            "CMPETRM_OC_NRO": self.name,
             "CMPETRM_IND_CLI": 2,
-            "CMPETRM_TERC": nit_cliente,
+            "CMPETRM_TERC": nit_cliente.split("-")[0],
             "CMPETRM_SUC": id_sucursal,
             "CMPETRM_FECHA": fecha_operacion,
             "CMPETRM_CO": "001",
             "CMPETRM_LOCAL": "03",
-            "Detalle": cg1_detalle
+            "Detalle": list(cg1_detalle.values())
         }, indent=4)
 
         return cg1_json
