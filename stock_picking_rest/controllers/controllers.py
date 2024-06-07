@@ -11,7 +11,7 @@ class Cg1DownloadJson(http.Controller):
         instancia = http.request.env['stock.picking'].browse(record_id)
         content = instancia._cg1_json_generator()
         response = Response(content, mimetype='text/plain')
-        filename = f'Pedido {instancia.name.replace("Arist/OUT/", "Odoo-")}.json'
+        filename = f'Pedido {instancia.name}.json'
         response.headers.set('Content-Disposition', 'attachment', filename=filename)
         return response
 
