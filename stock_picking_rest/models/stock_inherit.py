@@ -134,7 +134,10 @@ class StockInherit(models.Model):
         if es_sucursal:
             nit_cliente = "900538591"
         else:
-            nit_cliente = self.partner_id.vat
+            nit_cliente = str(self.partner_id.vat)
+            id_sucursal = "00"
+            nit_vendedor = str(self.sale_id.user_id.partner_id.vat)
+
 
         for producto in self.move_ids:
             referencia_producto = producto.product_id.default_code
