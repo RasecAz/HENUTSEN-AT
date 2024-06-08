@@ -23,6 +23,7 @@
                         <field name="url_bearer" readonly="state == 'done'" />
                         <field name="url_picking" readonly="state == 'done'" />
                         <field name="url_packing" readonly="state == 'done'" />
+                        <field name="url_variants" readonly="state == 'done'" />
                         <field name="url_adjustment" readonly="state == 'done'" />
                         <field name="email_henutsen" readonly="state == 'done'" />  
                         <field name="api_key" readonly="state == 'done'" />
