@@ -34,6 +34,7 @@
         'views/res_users_view.xml',
         'views/sale_order_view.xml',
         'views/product_template_view.xml',
+        'views/product_attribute_view.xml',
         'reports/report_deliveryslip.xml',
     ],
     'license': 'LGPL-3',

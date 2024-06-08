@@ -24,6 +24,9 @@ class ConfigHenutsenWizard(models.Model):
     url_adjustment = fields.Char(
         string = 'Url Ajuste inventarios'
     )
+    url_variants = fields.Char(
+        string = 'Url Variantes'
+    )
     api_key = fields.Text(
         string = 'Api Key usuario'
     )
@@ -59,6 +62,8 @@ class ConfigHenutsenWizard(models.Model):
             'url_bearer': self.url_bearer,
             'url_picking': self.url_picking,
             'url_packing': self.url_packing,
+            'url_adjustment': self.url_adjustment,
+            'url_variants': self.url_variants,
             'api_key': self.api_key,
             'email_henutsen': self.email_henutsen,
             'last_update': fields.Datetime.now()
@@ -104,6 +109,7 @@ class ConfigHenutsenWizard(models.Model):
         defaults['id'] = config.id if config else None
         defaults['last_update'] = config.last_update if config else None
         defaults['url_adjustment'] = config.url_adjustment if config else None
+        defaults['url_variants'] = config.url_variants if config else None
         defaults['state'] = config.state if config else 'draft'
         return defaults
     
