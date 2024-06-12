@@ -67,7 +67,12 @@ class StockQuant(models.Model):
                     return {'error': f'No se encontró el producto especificado, Valide las variantes y atributos enviados. Variantes enviadas en Henutsen: ({cadena}). Opciones disponibles: {cadena_odoo}'}
                 else:
                     return {'error': f'No se encontró el producto especificado. Valide el SKU del producto en Odoo: {product_data["nameProd"]}'}
-            ajuste_id = self.env['stock.quant'].sudo().search([('location_id.complete_name', '=', bodega),('product_id.id', '=', producto_variante.id),('lot_id.name', '=', product_data['batchNumber'])], limit=1)
+            if not product_data['batchNumber']:
+                ajuste_id = self.env['stock.quant'].sudo().search([('location_id.complete_name', '=', bodega),('product_id.id', '=', producto_variante.id)], limit=1)
+            else:
+                ajuste_id = self.env['stock.quant'].sudo().search([('location_id.complete_name', '=', bodega),('product_id.id', '=', producto_variante.id),('lot_id.name', '=', product_data['batchNumber'])], limit=1)
+                if not ajuste_id:
+                    ajuste_id = self.env['stock.quant'].sudo().search([('location_id.complete_name', '=', bodega),('product_id.id', '=', producto_variante.id)], limit=1)
             if not ajuste_id:
                 return {'error': f'La ubicación {bodega} no tiene existencias del producto {producto_variante.name}'}
             quant = ajuste_id.available_quantity
