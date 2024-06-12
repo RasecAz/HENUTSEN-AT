@@ -72,43 +72,34 @@ class StockInherit(models.Model):
         operacion_destino = self.partner_id.name
 
         #Se recorre cada producto de la operación
-        for product in self.move_ids:
+        for product in self.move_ids.move_line_ids:
+            lot_name = product.lot_id.name
+            if not lot_name:
+                lot_name = ""
             referencia_producto = product.product_id.default_code
             name_producto = product.product_id.name.rstrip()
             cantidad_producto = product.quantity
             variant_list = []
-
-            #Si existen variantes, se recorren y se obtienen los valores de cada una
-            if product.product_id.product_tmpl_id.attribute_line_ids:
-                for variant in product.product_id.product_tmpl_id.attribute_line_ids:
-                    tipo_variante = variant.attribute_id.name
-                    atributo_variante = ""
-                    refe = product.product_id.display_name
-                    attribute_values_string = refe.split("(")[1].split(")")[0]
-                    attribute_values = attribute_values_string.split(", ")
-                    #Se recorren los valores de las variantes y se comparan con los valores de la lista de variantes
-                    for lista in attribute_values:
-                        for value in variant.value_ids:
-                            if value.name in lista:
-                                atributo_variante = value.name
+            if product.product_id.product_template_attribute_value_ids:
+                for variante in product.product_id.product_template_attribute_value_ids:
                     variant_list.append({
-                        "name": tipo_variante,
-                        "value": atributo_variante
+                        "name": variante.attribute_id.name,
+                        "value": variante.name
                     })
                 product_list.append({
-                "observation": referencia_producto,
-                "quantity": cantidad_producto,
-                "productSku": name_producto,
-                "variantList": variant_list
-            })
-            #Si no existen variantes, no se incluye sección de variantList al json
+                    "observation": name_producto,
+                    "quantity": cantidad_producto,
+                    "batchNumber": lot_name,
+                    "productSku": referencia_producto,
+                    "variantList": variant_list
+                })
             else:
                 product_list.append({
-                "observation": referencia_producto,
-                "quantity": cantidad_producto,
-                "productSku": name_producto
-            })
-                
+                    "observation": name_producto,
+                    "quantity": cantidad_producto,
+                    "batchNumber": lot_name,
+                    "productSku": referencia_producto
+                })           
         data_json_picking= json.dumps({
             "consecutive": operation_name,
             "sourceLocation": operacion_origen,
@@ -296,14 +287,14 @@ class StockInherit(models.Model):
                         })
                     product_list.append({
                     "quantity": cantidad_producto,
-                    "productSku": name_producto,
+                    "productSku": referencia_producto,
                     "variantList": variant_list
                     })
                 #Si no existen variantes, no se incluye sección de variantList al json
                 else:
                     product_list.append({
                     "quantity": cantidad_producto,
-                    "productSku": name_producto
+                    "productSku": referencia_producto
                 })
             box_order.append({
                 "id": box_id,
