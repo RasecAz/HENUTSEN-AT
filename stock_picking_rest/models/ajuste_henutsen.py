@@ -103,7 +103,8 @@ class StockQuant(models.Model):
                 headers = {
                     'Content-Type': 'application/json',
                     'Authorization': f'Bearer {bearer_token}'
-                }                
+                }
+                lote = quant.lot_id.name if quant.lot_id.name else ""                
                 if quant.product_id.product_template_attribute_value_ids:
                     for variante_atributo in quant.product_id.product_template_attribute_value_ids:
                         variantValue = variante_atributo.name
@@ -111,14 +112,14 @@ class StockQuant(models.Model):
                         variant_list.append({"name": variantName, "value": variantValue})
                     data = json.dumps({
                         "productSku": quant.product_id.default_code,
-                        "batchNumber": quant.lot_id.name,
+                        "batchNumber": lote,
                         "quantity": quant.quantity - quant.inventory_quantity,
                         "variantList": variant_list,
                     })
                 else:
                     data = json.dumps({
                         "productSku": quant.product_id.default_code,
-                        "batchNumber": quant.lot_id.name,
+                        "batchNumber": lote,
                         "quantity": quant.quantity - quant.inventory_quantity,
                     })
                 response = requests.put(service_url, headers=headers, data=data)
