@@ -29,7 +29,7 @@ class StockQuant(models.Model):
             producto_variante = False
             producto = False
             bodega = False
-            producto_variante = self.env['product.product'].sudo().search([('name_rtrim', '=', product_data['nameProd'].rstrip())])
+            producto_variante = self.env['product.product'].sudo().search([('default_code', '=', product_data['nameProd'].rstrip())])
             # Buscar el quant para la ubicación y el producto
             compañia = self.env['res.company'].sudo().search([('name', '=', data['location'].rstrip())], limit=1)
             compañia = compañia.id
@@ -37,15 +37,11 @@ class StockQuant(models.Model):
             if not location:
                 return {'error': 'No se encontró la ubicación especificada'}
             bodega = location.complete_name
-            producto_variante = self.env['product.product'].sudo().search([('name', '=', product_data['nameProd'].rstrip())])
-            if not producto_variante:
-                producto_variante = self.env['product.product'].sudo().search([('name_rtrim', '=', product_data['nameProd'].rstrip())])
+            producto_variante = self.env['product.product'].sudo().search([('default_code', '=', product_data['nameProd'].rstrip())])
             if 'variantList' in product_data:
-                producto = self.env['product.product'].sudo().search([('name', '=', product_data['nameProd'].rstrip())])
+                producto = self.env['product.product'].sudo().search([('default_code', '=', product_data['nameProd'].rstrip())])
                 if not producto:
-                    producto = self.env['product.product'].sudo().search([('name_rtrim', '=', product_data['nameProd'].rstrip())])
-                    if not producto:
-                        return {'error': 'No se encontró el producto, valide el nombre del mismo'}
+                    return {'error': 'No se encontró el producto, valide su SKU: ' + product_data['nameProd']}
                 for variante in product_data['variantList']:
                     if 'name' in variante or 'value' in variante:
                         variante_list_json.append(variante['value'])
@@ -63,17 +59,20 @@ class StockQuant(models.Model):
                                 pass
                             variante_list_odoo = []                               
             else:
-                producto_variante = self.env['product.product'].sudo().search([('name', '=', product_data['nameProd'].rstrip())], limit=1)
-                if not producto_variante:
-                    producto_variante = self.env['product.product'].sudo().search([('name_rtrim', '=', product_data['nameProd'].rstrip())], limit=1)
+                producto_variante = self.env['product.product'].sudo().search([('default_code', '=', product_data['nameProd'].rstrip())], limit=1)
             if not producto_variante:
                 if 'variantList' in product_data:
                     cadena = ', '.join(variante_list_json)
                     cadena_odoo = ', '.join('({} {})'.format(variante_list_debug[i], variante_list_debug[i+1]) for i in range(0, len(variante_list_debug), 2))
                     return {'error': f'No se encontró el producto especificado, Valide las variantes y atributos enviados. Variantes enviadas en Henutsen: ({cadena}). Opciones disponibles: {cadena_odoo}'}
                 else:
-                    return {'error': f'No se encontró el producto especificado. Valide el nombre del producto en Odoo: {product_data["nameProd"]}'}
-            ajuste_id = self.env['stock.quant'].sudo().search([('location_id.complete_name', '=', bodega),('product_id.id', '=', producto_variante.id)], limit=1)
+                    return {'error': f'No se encontró el producto especificado. Valide el SKU del producto en Odoo: {product_data["nameProd"]}'}
+            if not product_data['batchNumber']:
+                ajuste_id = self.env['stock.quant'].sudo().search([('location_id.complete_name', '=', bodega),('product_id.id', '=', producto_variante.id)], limit=1)
+            else:
+                ajuste_id = self.env['stock.quant'].sudo().search([('location_id.complete_name', '=', bodega),('product_id.id', '=', producto_variante.id),('lot_id.name', '=', product_data['batchNumber'])], limit=1)
+                if not ajuste_id:
+                    ajuste_id = self.env['stock.quant'].sudo().search([('location_id.complete_name', '=', bodega),('product_id.id', '=', producto_variante.id)], limit=1)
             if not ajuste_id:
                 return {'error': f'La ubicación {bodega} no tiene existencias del producto {producto_variante.name}'}
             quant = ajuste_id.available_quantity
@@ -104,20 +103,23 @@ class StockQuant(models.Model):
                 headers = {
                     'Content-Type': 'application/json',
                     'Authorization': f'Bearer {bearer_token}'
-                }                
+                }
+                lote = quant.lot_id.name if quant.lot_id.name else ""                
                 if quant.product_id.product_template_attribute_value_ids:
                     for variante_atributo in quant.product_id.product_template_attribute_value_ids:
                         variantValue = variante_atributo.name
                         variantName = variante_atributo.attribute_id.name
                         variant_list.append({"name": variantName, "value": variantValue})
                     data = json.dumps({
+                        "productSku": quant.product_id.default_code,
+                        "batchNumber": lote,
                         "quantity": quant.quantity - quant.inventory_quantity,
-                        "productSku": quant.product_id.name,
                         "variantList": variant_list,
                     })
                 else:
                     data = json.dumps({
-                        "productSku": quant.product_id.name,
+                        "productSku": quant.product_id.default_code,
+                        "batchNumber": lote,
                         "quantity": quant.quantity - quant.inventory_quantity,
                     })
                 response = requests.put(service_url, headers=headers, data=data)
