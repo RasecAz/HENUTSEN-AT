@@ -111,19 +111,22 @@ class StockInherit(models.Model):
     # INFO: Método que genera el json a CG1 al validar la orden de salida
     def _cg1_json_generator(self):
         cg1_detalle = {}
+        especial_lista = []
         fecha_operacion = str(self.date.strftime("%Y-%m-%d"))
         es_sucursal = False
         prefijo = self.picking_type_id.sequence_id.prefix
         lista_precio = self.sale_id.pricelist_id.name
         items_lista = self.env['product.pricelist'].search([('name', '=', lista_precio)])
-        nit_vendedor = self.location_id.company_id.vat
+        nit_vendedor = str(self.location_id.company_id.vat)
         id_sucursal = self.partner_id.company_registry
-
+        especiales = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).special_branch
+        if especiales:
+            especial_lista = especiales.split(",")
         for sucursal in self.location_id.company_id.child_ids:
                 sucursales = sucursal.name
                 if sucursales == self.partner_id.name:
                     es_sucursal = True
-        if es_sucursal:
+        if es_sucursal and self.partner_id.vat not in especial_lista:
             nit_cliente = "900538591"
         else:
             nit_cliente = str(self.partner_id.vat)
