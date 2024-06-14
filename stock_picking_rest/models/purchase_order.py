@@ -62,8 +62,6 @@ class PurchaseOrderLine(models.Model):
                 else:
                     for stock in stock:
                         stock_available = stock.available_quantity
-                        if stock_available <= 0:
-                            stock_available = 0
                         stock_quant += stock_available
             line.stock_in_warehouse = stock_quant
 
