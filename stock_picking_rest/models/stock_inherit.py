@@ -113,6 +113,7 @@ class StockInherit(models.Model):
         cg1_detalle = {}
         fecha_operacion = str(self.date.strftime("%Y-%m-%d"))
         es_sucursal = False
+        prefijo = self.picking_type_id.sequence_id.prefix
         lista_precio = self.sale_id.pricelist_id.name
         items_lista = self.env['product.pricelist'].search([('name', '=', lista_precio)])
         nit_vendedor = self.location_id.company_id.vat
@@ -158,7 +159,7 @@ class StockInherit(models.Model):
                     }
 
         cg1_json = json.dumps({
-            "CMPETRM_OC_NRO": self.name,
+            "CMPETRM_OC_NRO": self.name.replace(prefijo, "", 1),
             "CMPETRM_IND_CLI": 2,
             "CMPETRM_TERC": nit_cliente.split("-")[0],
             "CMPETRM_SUC": id_sucursal,

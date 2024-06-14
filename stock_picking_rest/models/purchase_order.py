@@ -56,22 +56,19 @@ class PurchaseOrderLine(models.Model):
                 location = self.env['stock.location'].sudo().search([('company_id', '=', main_company),('name', '=', 'Existencias')], limit=1)
             for ubicacion in location.child_internal_location_ids:
                 internal_location = ubicacion.complete_name
-                stock = self.env['stock.quant'].sudo().search([('location_id.complete_name', '=', internal_location),('product_id.id', '=', product.id)], limit=1)
+                stock = self.env['stock.quant'].sudo().search([('location_id.complete_name', '=', internal_location),('product_id.id', '=', product.id)])
                 if not stock:
                     stock_available = 0
                 else:
-                    stock_available = stock.available_quantity
-                    if stock_available <= 0:
-                        stock_available = 0
-                    stock_quant += stock_available
+                    for stock in stock:
+                        stock_available = stock.available_quantity
+                        stock_quant += stock_available
             line.stock_in_warehouse = stock_quant
 
     # INFO: Método para validar que la cantidad de productos ingresados en la orden de compra, no sea mayor al stock en planta
     @api.onchange('product_qty', 'stock_in_warehouse')
     def _onchange_product_qty(self):
         for line in self:
-            main_company = line.company_id.parent_id.id
-            # if main_company:
             if line.product_qty > line.stock_in_warehouse:
                 line.stock_state = 'not_available'
             elif line.product_qty == line.stock_in_warehouse:
