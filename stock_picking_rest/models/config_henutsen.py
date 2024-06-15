@@ -37,6 +37,11 @@ class ConfigHenutsenWizard(models.Model):
         string = 'Bearer Token',
         readonly=True
     )
+    special_branch = fields.Text(
+        string = 'Tiendas especiales',
+        help='Ingrese los números de identificación de las tiendas especiales, tiendas registradas como sucursales en Odoo, pero que para CG1 son terceros. OJO: Ingrese el id tal cual como está registrado en el contacto (tenga en cuenta el dígito de verificación) separados por coma(,), sin espacios. Ejemplo: 123-1,231,321-0,432,543'
+    )
+
     last_update = fields.Datetime(
         string = 'Última actualización',
         readonly=True
@@ -65,6 +70,7 @@ class ConfigHenutsenWizard(models.Model):
             'url_adjustment': self.url_adjustment,
             'url_variants': self.url_variants,
             'api_key': self.api_key,
+            'special_branch': self.special_branch,
             'email_henutsen': self.email_henutsen,
             'last_update': fields.Datetime.now()
         })
@@ -108,6 +114,7 @@ class ConfigHenutsenWizard(models.Model):
         defaults['bearer_token'] = config.bearer_token if config else None
         defaults['id'] = config.id if config else None
         defaults['last_update'] = config.last_update if config else None
+        defaults['special_branch'] = config.special_branch if config else None
         defaults['url_adjustment'] = config.url_adjustment if config else None
         defaults['url_variants'] = config.url_variants if config else None
         defaults['state'] = config.state if config else 'draft'
