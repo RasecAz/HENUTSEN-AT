@@ -400,14 +400,5 @@ class StockInherit(models.Model):
                 for product in record.move_ids:
                     total += product.quantity
                 record.total_order = total
-    
-    # INFO: Método que valida que la cantidad de productos registrada no sea mayor a la cantidad solicitada, sólo aplica para operaciones de picking, packing y salida
-    def button_validate(self):
-        es_salida = False
-        if self.picking_type_id.sequence_code == "PICK" or self.picking_type_id.sequence_code == "PACK" or self.picking_type_id.sequence_code == "OUT":
-            es_salida = True        
-        for product in self.move_ids:
-            if product.quantity > product.product_uom_qty and es_salida:
-                raise ValidationError(f'La cantidad del producto "{product.product_id.display_name}" no puede ser mayor a la cantidad solicitada')
-        res = super(StockInherit, self).button_validate()
-        return res
+
+                
