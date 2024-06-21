@@ -6,6 +6,7 @@ from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
 from odoo.tools.float_utils import float_is_zero
 from markupsafe import Markup
 from odoo.exceptions import ValidationError
+import os
 
 class StockInherit(models.Model):
     _inherit = 'stock.picking'
@@ -113,6 +114,11 @@ class StockInherit(models.Model):
         cg1_detalle = {}
         especial_lista = []
         fecha_operacion = str(self.date.strftime("%Y-%m-%d"))
+        config = self.get_config_params()
+        service_url = config['url_cg1']
+        headers = {
+                'Content-Type': 'application/json'
+            }
         es_sucursal = False
         prefijo = self.picking_type_id.sequence_id.prefix
         lista_precio = self.sale_id.pricelist_id.name
@@ -160,8 +166,29 @@ class StockInherit(models.Model):
                         "CMPETRM_VENDEDOR": nit_vendedor.split("-")[0],
                         "CMPETRM_MOTIVO": "01"
                     }
-
         cg1_json = json.dumps({
+            "CMPETRM_OC_NRO": self.name.replace(prefijo, "", 1),
+            "CMPETRM_IND_CLI": 2,
+            "CMPETRM_TERC": nit_cliente.split("-")[0],
+            "CMPETRM_SUC": id_sucursal,
+            "CMPETRM_FECHA": fecha_operacion,
+            "CMPETRM_CO": "001",
+            "CMPETRM_LOCAL": "03",
+            "Detalle": list(cg1_detalle.values())
+        })
+
+        response = requests.request("POST", service_url, headers=headers, data=cg1_json)
+
+        if response.status_code == 200:
+            body_mensaje = Markup(f'<h2>¡Envío a CG1 Exitoso!</h2> <p>Se ha enviado la información a CG1, consulte la información en el sistema.</p>')
+            self.message_post(body=body_mensaje, message_type='notification')
+            self.rfid_response = "SUCCESS"
+            self.response = response.text
+        else:
+            self.rfid_response = "FAILED. Error " + str(response.status_code)
+            self.response = response.text
+
+        cg1_json_formated = json.dumps({
             "CMPETRM_OC_NRO": self.name.replace(prefijo, "", 1),
             "CMPETRM_IND_CLI": 2,
             "CMPETRM_TERC": nit_cliente.split("-")[0],
@@ -172,43 +199,15 @@ class StockInherit(models.Model):
             "Detalle": list(cg1_detalle.values())
         }, indent=4)
 
-        return cg1_json
-
-    # INFO: Método que genera el Bearer Token con la API Key suministrada
-    def _generate_bearer_token(self):
-        api_key = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).api_key
-        email = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).email_henutsen
-        bearer_url = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).url_bearer
-        self.api_key = api_key
-        token_url = f'{bearer_url}/{email}?apiKey={api_key}'
-
-        # Envío de la solicitud y obtención de la respuesta
-        response = requests.post(token_url)
-
-        # Verificación del código de estado
-        if response.status_code == 200:
-            # La solicitud fue exitosa, procesa la respuesta JSON
-            response_json = response.json()
-            bearer_token = response_json["accessToken"]  # accesToken contiene el token
-            self.bearer = bearer_token
-            return bearer_token
-        else:
-            # La solicitud falló, maneja el error
-            self.bearer = "Error" + str(response.status_code)
-            raise ValidationError("Error " + str(response.status_code) + "Respuesta: " + response.text)
+        return cg1_json_formated
 
     # INFO: Método que envía la información a la URL expuesta de Henutsen 
     def _picking_service(self):
         data_json = self._create_debug_json()
+        config = self.get_config_params()
         self.json_generado = data_json
-        if not self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).api_key or not self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).email_henutsen or not self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).url_picking:
-            raise ValidationError('Faltan datos para enviar la información, completelos en la sección de Configuración Henutsen, si no tiene acceso, solicitele a un administrador que actualice esta información')
-        bearer_token = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).bearer_token
-        if not bearer_token:
-            bearer_token = self._generate_bearer_token()
-        else:
-            bearer_token = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).bearer_token
-        service_url = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).url_picking
+        bearer_token = config['bearer_token']
+        service_url = config['url_picking']
         self.endpoint = service_url
         headers = {
             'Content-Type': 'application/json',
@@ -226,7 +225,7 @@ class StockInherit(models.Model):
             self.response = response.text
         else:
             # La solicitud falló, maneja el error
-            bearer_token = self._generate_bearer_token()
+            bearer_token = self.get_bearer()
             headers = {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + bearer_token
@@ -234,7 +233,6 @@ class StockInherit(models.Model):
             response = requests.request("POST",service_url, headers=headers, data=data_json)
 
             if response.status_code == 200:
-                self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).sudo().write({'bearer_token': bearer_token})
                 body_mensaje = Markup(f'<h2>¡Generación de códigos RFID en Henutsen exitosa!</h2> <p>Se ha enviado la información a Henutsen, inicie el proceso de etiquetado.</p>')
                 self.message_post(body=body_mensaje, message_type='notification')
                 self.rfid_response = "SUCCESS"
@@ -313,14 +311,9 @@ class StockInherit(models.Model):
         })
         # IMPORTANTE: Todo debe estar configurado en la vista de configuración de Henutsen para que el web service funcione correctamente. El programa es capaz de reconfigurarse si el token expira.
         self.json_generado = data_json_packing
-        if not self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).api_key or not self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).email_henutsen or not self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).url_packing:
-            raise ValidationError('Faltan datos para enviar la información, completelos en la sección de Configuración Henutsen, si no tiene acceso, solicitele a un administrador que actualice esta información')
-        bearer_token = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).bearer_token
-        if not bearer_token:
-            bearer_token = self._generate_bearer_token()
-        else:
-            bearer_token = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).bearer_token
-        service_url = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).url_packing
+        config = self.get_config_params()
+        bearer_token = config['bearer_token']
+        service_url = config['url_packing']
         self.endpoint = service_url
         
         headers = {
@@ -339,7 +332,7 @@ class StockInherit(models.Model):
             self.response = response.text
         else:
             # La solicitud falló, maneja el error
-            bearer_token = self._generate_bearer_token()
+            bearer_token = self.get_bearer()
             headers = {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + bearer_token
@@ -347,7 +340,6 @@ class StockInherit(models.Model):
             # Preparación de la solicitud POST con el token
             response = requests.request("POST",service_url, headers=headers, data=data_json_packing)
             if response.status_code == 200:
-                self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).sudo().write({'bearer_token': bearer_token})
                 body_mensaje = Markup(f'<h2>¡Operación exitosa!</h2> <p>Se ha enviado la información a Henutsen.</p>')
                 self.message_post(body=body_mensaje, message_type='notification')
                 self.rfid_response = "SUCCESS"
@@ -403,5 +395,39 @@ class StockInherit(models.Model):
                 for product in record.move_ids:
                     total += product.quantity
                 record.total_order = total
+    
+    def get_config_params(self):
+        config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
+        if not config_params.api_key or not config_params.email_henutsen or not config_params.url_bearer or not config_params.url_picking or not config_params.url_packing:
+            raise ValidationError('Faltan datos en la configuración de Henutsen, valide que todos los campos estén completos, si no tiene acceso, solicitele a un administrador que actualice esta información')
+        if os.environ.get("ODOO_STAGE") == 'production':
+            bearer_token = config_params.bearer_token
+            if not bearer_token:
+                bearer_token = config_params.get_bearer()
+            return {
+                'url_picking': config_params.url_picking,
+                'url_packing': config_params.url_packing,
+                'url_cg1': config_params.url_cg1,
+                'bearer_token': bearer_token,
 
-                
+            }
+        else:
+            bearer_token = config_params.bearer_token_qa
+            if not bearer_token:
+                bearer_token = config_params.get_bearer_qa()
+            return {
+                'url_picking': config_params.url_picking_qa,
+                'url_packing': config_params.url_packing_qa,
+                'url_cg1': config_params.url_cg1_qa,
+                'bearer_token': bearer_token,
+            }
+
+    def get_bearer(self):
+        config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
+        if os.environ.get("ODOO_STAGE") == 'production':
+            return config_params.get_bearer()
+        else:
+            return config_params.get_bearer_qa()
+              
+
+              

@@ -11,6 +11,7 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
                     <button string='Guardar' name="save_data" type="object" class="btn-primary" invisible="state == 'done'"/>
                     <button string='Actualizar Bearer' name="get_bearer" type="object" class="btn-primary"/>
+                    <button string='Actualizar Bearer QA' name="get_bearer_qa" type="object" class="btn" />
                     <button string='Modificar Info' name="modify_config" type="object" class="btn" invisible="state == 'draft'"/>
                 </header>
                 <sheet>
@@ -18,18 +19,38 @@
                     <div class="oe_title" colspan="4">
                         <h1>Configuración de parámetros Webservice Henutsen</h1>
                     </div>
-                    <group>
-                        <field name="last_update" />
-                        <field name="url_bearer" readonly="state == 'done'" />
-                        <field name="url_picking" readonly="state == 'done'" />
-                        <field name="url_packing" readonly="state == 'done'" />
-                        <field name="url_variants" readonly="state == 'done'" />
-                        <field name="url_adjustment" readonly="state == 'done'" />
-                        <field name="email_henutsen" readonly="state == 'done'" />
-                        <field name="special_branch" readonly="state == 'done'" />  
-                        <field name="api_key" readonly="state == 'done'" />
-                        <field name="bearer_token" />
-                    </group>
+                    <notebook>
+                        <page name="production" string="Producción">
+                            <group>
+                                <field name="last_update" />
+                                <field name="url_bearer" readonly="state == 'done'" />
+                                <field name="url_picking" readonly="state == 'done'" />
+                                <field name="url_packing" readonly="state == 'done'" />
+                                <field name="url_variants" readonly="state == 'done'" />
+                                <field name="url_adjustment" readonly="state == 'done'" />
+                                <field name="url_cg1" readonly="state == 'done'" />
+                                <field name="email_henutsen" readonly="state == 'done'" />
+                                <field name="special_branch" readonly="state == 'done'" />  
+                                <field name="api_key" readonly="state == 'done'" />
+                                <field name="bearer_token" />
+                            </group>
+                        </page>
+                        <page name="test" string="Test">
+                            <group>
+                                <field name="last_update" />
+                                <field name="url_bearer_qa" readonly="state == 'done'" />
+                                <field name="url_picking_qa" readonly="state == 'done'" />
+                                <field name="url_packing_qa" readonly="state == 'done'" />
+                                <field name="url_variants_qa" readonly="state == 'done'" />
+                                <field name="url_adjustment_qa" readonly="state == 'done'" />
+                                <field name="url_cg1_qa" readonly="state == 'done'" />
+                                <field name="email_henutsen_qa" readonly="state == 'done'" />
+                                <field name="special_branch_qa" readonly="state == 'done'" />  
+                                <field name="api_key_qa" readonly="state == 'done'" />
+                                <field name="bearer_token_qa" />
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
