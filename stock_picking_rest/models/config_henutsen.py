@@ -1,6 +1,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 import requests
+import os
 
 
 class ConfigHenutsenWizard(models.Model):
@@ -27,6 +28,9 @@ class ConfigHenutsenWizard(models.Model):
     url_variants = fields.Char(
         string = 'Url Variantes'
     )
+    url_cg1 = fields.Char(
+        string = 'Url CG1'
+    )
     api_key = fields.Text(
         string = 'Api Key usuario'
     )
@@ -41,6 +45,37 @@ class ConfigHenutsenWizard(models.Model):
         string = 'Tiendas especiales',
         help='Ingrese los números de identificación de las tiendas especiales, tiendas registradas como sucursales en Odoo, pero que para CG1 son terceros. OJO: Ingrese el id tal cual como está registrado en el contacto (tenga en cuenta el dígito de verificación) separados por coma(,), sin espacios. Ejemplo: 123-1,231,321-0,432,543'
     )
+    url_bearer_qa = fields.Char(
+    string = 'Url Bearer Token QA'
+    )
+    url_picking_qa = fields.Char(
+        string = 'Url Picking QA'
+    )
+    url_packing_qa = fields.Char(
+        string = 'Url Packing QA'
+    )
+    url_adjustment_qa = fields.Char(
+        string = 'Url Ajuste inventarios QA'
+    )
+    url_variants_qa = fields.Char(
+        string = 'Url Variantes QA'
+    )
+    url_cg1_qa = fields.Char(
+        string = 'Url CG1 QA'
+    )
+    api_key_qa = fields.Text(
+        string = 'Api Key usuario QA'
+    )
+    email_henutsen_qa = fields.Char(
+        string = 'Email QA Henutsen'
+    )
+    bearer_token_qa = fields.Text(
+        string = 'Bearer Token QA',
+        readonly=True
+    )
+    special_branch_qa = fields.Text(
+        string = 'Tiendas especiales QA',
+    )
 
     last_update = fields.Datetime(
         string = 'Última actualización',
@@ -52,6 +87,10 @@ class ConfigHenutsenWizard(models.Model):
             ('done', 'Guardado')
         ],
         default='draft'
+    )
+    is_production = fields.Boolean(
+        string = 'Es producción',
+        default=True
     )
 
 # --------------------------------------------------------------------------------
@@ -69,10 +108,20 @@ class ConfigHenutsenWizard(models.Model):
             'url_packing': self.url_packing,
             'url_adjustment': self.url_adjustment,
             'url_variants': self.url_variants,
+            'url_cg1': self.url_cg1,
             'api_key': self.api_key,
             'special_branch': self.special_branch,
             'email_henutsen': self.email_henutsen,
-            'last_update': fields.Datetime.now()
+            'last_update': fields.Datetime.now(),
+            'url_bearer_qa': self.url_bearer_qa,
+            'url_picking_qa': self.url_picking_qa,
+            'url_packing_qa': self.url_packing_qa,
+            'url_adjustment_qa': self.url_adjustment_qa,
+            'url_variants_qa': self.url_variants_qa,
+            'url_cg1_qa': self.url_cg1_qa,
+            'api_key_qa': self.api_key_qa,
+            'special_branch_qa': self.special_branch_qa,
+            'email_henutsen_qa': self.email_henutsen_qa,
         })
         self.state = 'done'
 
@@ -100,6 +149,34 @@ class ConfigHenutsenWizard(models.Model):
         else:
             # La solicitud falló, maneja el error
             self.write({'bearer_token': "Error " + str(response.status_code) + ". Respuesta: " + response.text})
+            bearer_token = "Error " + str(response.status_code) + ". Respuesta: " + response.text
+        return bearer_token
+    
+    def get_bearer_qa(self):
+        if not self.api_key_qa or not self.email_henutsen_qa or not self.url_bearer_qa:
+            raise ValidationError('Faltan datos para obtener el token de QA')
+        if self.bearer_token_qa:
+            self.bearer_token_qa = False
+        api_key = self.api_key_qa
+        email = self.email_henutsen_qa
+        bearer_url = self.url_bearer_qa
+        self.api_key_qa = api_key
+        token_url = f'{bearer_url}/{email}?apiKey={api_key}'
+
+        # Envío de la solicitud y obtención de la respuesta
+        response = requests.post(token_url)
+
+        # Verificación del código de estado
+        if response.status_code == 200:
+            # La solicitud fue exitosa, procesa la respuesta JSON
+            response_json = response.json()
+            bearer_token = response_json["accessToken"]  # accesToken contiene el token
+            self.write({'bearer_token_qa': bearer_token})
+        else:
+            # La solicitud falló, maneja el error
+            self.write({'bearer_token_qa': "Error " + str(response.status_code) + ". Respuesta: " + response.text})
+            bearer_token = "Error " + str(response.status_code) + ". Respuesta: " + response.text
+        return bearer_token
 
     # INFO: Método que asigna los valores por defecto a los campos de la vista, al momento de ingresar
     @api.model
@@ -117,6 +194,17 @@ class ConfigHenutsenWizard(models.Model):
         defaults['special_branch'] = config.special_branch if config else None
         defaults['url_adjustment'] = config.url_adjustment if config else None
         defaults['url_variants'] = config.url_variants if config else None
+        defaults['url_cg1'] = config.url_cg1 if config else None
+        defaults['url_bearer_qa'] = config.url_bearer_qa if config else None
+        defaults['url_picking_qa'] = config.url_picking_qa if config else None
+        defaults['url_packing_qa'] = config.url_packing_qa if config else None
+        defaults['api_key_qa'] = config.api_key_qa if config else None
+        defaults['email_henutsen_qa'] = config.email_henutsen_qa if config else None
+        defaults['bearer_token_qa'] = config.bearer_token_qa if config else None
+        defaults['special_branch_qa'] = config.special_branch_qa if config else None
+        defaults['url_adjustment_qa'] = config.url_adjustment_qa if config else None
+        defaults['url_variants_qa'] = config.url_variants_qa if config else None
+        defaults['url_cg1_qa'] = config.url_cg1_qa if config else None
         defaults['state'] = config.state if config else 'draft'
         return defaults
     

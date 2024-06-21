@@ -30,7 +30,7 @@
                 <field name="packing_button_visible" invisible="1"/>
                 <button name="send_picking_to_henutsen" invisible="not send_button_visible" string="Generar códigos RFID en Henutsen" type="object" class="oe_highlight"/>
                 <button name="generate_download_cg1" invisible="not cg1_button_visible" string="Descarga JSON CG1" type="object" class="oe_highlight"/>
-                <button name="send_packing_to_henutsen" invisible="not packing_button_visible" string="Enviar a verificación RFID Henutsen" type="object" class="oe_highlight"/>          
+                <button name="send_packing_to_henutsen" invisible="not packing_button_visible" string="Enviar a verificación RFID Henutsen" type="object" class="oe_highlight"/>  
             </xpath>
             <xpath expr="//group[@name='other_infos']" position="inside">
                 <field name="total_order" invisible="state != 'done'" />
