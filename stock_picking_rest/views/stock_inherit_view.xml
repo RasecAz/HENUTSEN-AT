@@ -10,7 +10,11 @@
                 <field name="rfid_response" invisible="1"/>
             </xpath>
             <xpath expr="//sheet/div[@name='button_box']" position="before">
+                <field name="ribbon_visible" invisible="1"/>
+                <field name="ribbon_error" invisible="1"/>
                 <widget name="web_ribbon" title="Enviado a Henutsen" bg_color="text-bg-info" invisible="rfid_response != 'SUCCESS'"/>
+                <widget name="web_ribbon" title="Enviado a CG1" bg_color="text-bg-info" invisible="not ribbon_visible"/>
+                <widget name="web_ribbon" title="Envío Errado" bg_color="text-bg-danger" invisible="not ribbon_error"/>
             </xpath>
             <xpath expr='//notebook' position="inside">
                 <page name="conectionpage" string="Conexión Henutsen" groups="base.group_no_one">
@@ -29,8 +33,8 @@
                 <field name="cg1_button_visible" invisible="1"/>
                 <field name="packing_button_visible" invisible="1"/>
                 <button name="send_picking_to_henutsen" invisible="not send_button_visible" string="Generar códigos RFID en Henutsen" type="object" class="oe_highlight"/>
-                <button name="generate_download_cg1" invisible="not cg1_button_visible" string="Descarga JSON CG1" type="object" class="oe_highlight"/>
-                <button name="send_packing_to_henutsen" invisible="not packing_button_visible" string="Enviar a verificación RFID Henutsen" type="object" class="oe_highlight"/>  
+                <button name="send_operation_to_cg1" invisible="not cg1_button_visible" string="Enviar a CG1" type="object" class="oe_highlight"/>
+                <button name="send_packing_to_henutsen" invisible="not packing_button_visible" string="Enviar a verificación RFID Henutsen" type="object" class="oe_highlight"/>
             </xpath>
             <xpath expr="//group[@name='other_infos']" position="inside">
                 <field name="total_order" invisible="state != 'done'" />
