@@ -1,12 +1,12 @@
 import json
 import requests
+import os
 
 from odoo import SUPERUSER_ID, _, fields, models, api
 from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
-from odoo.tools.float_utils import float_is_zero
 from markupsafe import Markup
 from odoo.exceptions import ValidationError
-import os
+from datetime import datetime
 
 class StockInherit(models.Model):
     _inherit = 'stock.picking'
@@ -56,7 +56,18 @@ class StockInherit(models.Model):
         compute='_compute_total_order',
         store=True
     )
-    
+    ribbon_visible = fields.Boolean(
+        string='Ribbon visible',
+        default=False
+    )
+    ribbon_error = fields.Boolean(
+        string='Ribbon error',
+        default=False
+    )
+    is_executed = fields.Boolean(
+        string='Is executed',
+        default=False
+    )
 
 # ------------------------------------------------------------------------------------------------
 # METODOS
@@ -110,96 +121,108 @@ class StockInherit(models.Model):
         return data_json_picking
 
     # INFO: Método que genera el json a CG1 al validar la orden de salida
-    def _cg1_json_generator(self):
-        cg1_detalle = {}
-        especial_lista = []
-        fecha_operacion = str(self.date.strftime("%Y-%m-%d"))
-        config = self.get_config_params()
-        service_url = config['url_cg1']
-        headers = {
-                'Content-Type': 'application/json'
-            }
-        es_sucursal = False
-        prefijo = self.picking_type_id.sequence_id.prefix
-        lista_precio = self.sale_id.pricelist_id.name
-        items_lista = self.env['product.pricelist'].search([('name', '=', lista_precio)])
-        nit_vendedor = str(self.location_id.company_id.vat)
-        id_sucursal = self.partner_id.company_registry
-        especiales = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).special_branch
-        if especiales:
-            especial_lista = especiales.split(",")
-        for sucursal in self.location_id.company_id.child_ids:
-                sucursales = sucursal.name
-                if sucursales == self.partner_id.name:
-                    es_sucursal = True
-        if es_sucursal and self.partner_id.vat not in especial_lista:
-            nit_cliente = "900538591"
-        else:
-            nit_cliente = str(self.partner_id.vat)
-            id_sucursal = "00"
-            nit_vendedor = str(self.sale_id.user_id.partner_id.vat)
+    def send_operation_to_cg1(self):
+        if not self.is_executed:
+            self.is_executed = True
+            cg1_detalle = {}
+            especial_lista = []
+            fecha_operacion = datetime.now().strftime("%Y-%m-%d")
+            config = self.get_config_params()
+            service_url = config['url_cg1']
+            headers = {
+                    'Content-Type': 'application/json'
+                }
+            es_sucursal = False
+            prefijo = self.picking_type_id.sequence_id.prefix
+            lista_precio = self.sale_id.pricelist_id.name
+            items_lista = self.env['product.pricelist'].search([('name', '=', lista_precio)])
+            nit_vendedor = str(self.location_id.company_id.vat)
+            id_sucursal = self.partner_id.company_registry
+            especiales = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).special_branch
+            if especiales:
+                especial_lista = especiales.split(",")
+            for sucursal in self.location_id.company_id.child_ids:
+                    sucursales = sucursal.name
+                    if sucursales == self.partner_id.name:
+                        es_sucursal = True
+            if es_sucursal and self.partner_id.vat not in especial_lista:
+                nit_cliente = "900538591"
+            else:
+                nit_cliente = str(self.partner_id.vat)
+                id_sucursal = "00"
+                nit_vendedor = str(self.sale_id.user_id.partner_id.vat)
 
 
-        for producto in self.move_ids:
-            referencia_producto = producto.product_id.default_code
-            cantidad_producto = producto.quantity
-            precio_producto = None
-            for item in items_lista.item_ids:
-                if item.product_tmpl_id.name == producto.product_id.name:
-                    precio_producto = int(round(item.fixed_price))
-            if not precio_producto:
-                precio_producto = 0
-            if cantidad_producto != 0:
-                if referencia_producto in cg1_detalle:
-                    suma = float(cg1_detalle[referencia_producto]["CMPETRM_CANT_PED_1"]) + cantidad_producto
-                    cg1_detalle[referencia_producto]["CMPETRM_CANT_PED_1"] = str(int(round(suma)))
+            for producto in self.move_ids:
+                referencia_producto = producto.product_id.default_code
+                cantidad_producto = producto.quantity
+                precio_producto = None
+                for item in items_lista.item_ids:
+                    if item.product_tmpl_id.name == producto.product_id.name:
+                        precio_producto = int(round(item.fixed_price))
+                if not precio_producto:
+                    precio_producto = 0
+                if cantidad_producto != 0:
+                    if referencia_producto in cg1_detalle:
+                        suma = float(cg1_detalle[referencia_producto]["CMPETRM_CANT_PED_1"]) + cantidad_producto
+                        cg1_detalle[referencia_producto]["CMPETRM_CANT_PED_1"] = str(int(round(suma)))
+                    else:
+                        cg1_detalle[referencia_producto] = {
+                            "CMPETRM_IND_ITEMS": "I",
+                            "CMPETRM_ITEMS": referencia_producto,
+                            "CMPETRM_UNIMED_CAP": "UND",
+                            "CMPETRM_CANT_PED_1": str(int(cantidad_producto)),
+                            "CMPETRM_IND_UNIDAD": "1",
+                            "CMPETRM_LIPRE": lista_precio,
+                            "CMPETRM_PRECIO_UNI": str(precio_producto),
+                            "CMPETRM_FECHA": fecha_operacion,
+                            "CMPETRM_VENDEDOR": nit_vendedor.split("-")[0],
+                            "CMPETRM_MOTIVO": "01"
+                        }
+            cg1_json = json.dumps({
+                "CMPETRM_OC_NRO": self.name.replace(prefijo, "", 1),
+                "CMPETRM_IND_CLI": 2,
+                "CMPETRM_TERC": nit_cliente.split("-")[0],
+                "CMPETRM_SUC": id_sucursal,
+                "CMPETRM_FECHA": fecha_operacion,
+                "CMPETRM_CO": "001",
+                "CMPETRM_LOCAL": "03",
+                "Detalle": list(cg1_detalle.values())
+            })
+            
+            response = requests.request("POST", service_url, headers=headers, data=cg1_json)
+
+            try:
+                response_json = response.json()
+                if response.status_code == 200 and "ok" in response_json:
+                    body_mensaje = Markup(f'<h2>¡Envío a CG1 Exitoso!</h2> <p>Se ha enviado la información a CG1, consulte la información en el sistema.</p>')
+                    self.message_post(body=body_mensaje, message_type='notification')
+                    self.rfid_response = "SUCCESS"
+                    self.ribbon_visible = True
+                    self.response = response.text
+                elif "error" in response_json or "detail" in response_json:
+                    self.rfid_response = "FAILED. Error en la respuesta del servicio."
+                    self.ribbon_error = True
+                    self.ribbon_visible = False
+                    self.response = response.text
                 else:
-                    cg1_detalle[referencia_producto] = {
-                        "CMPETRM_IND_ITEMS": "I",
-                        "CMPETRM_ITEMS": referencia_producto,
-                        "CMPETRM_UNIMED_CAP": "UND",
-                        "CMPETRM_CANT_PED_1": str(int(cantidad_producto)),
-                        "CMPETRM_IND_UNIDAD": "1",
-                        "CMPETRM_LIPRE": lista_precio,
-                        "CMPETRM_PRECIO_UNI": str(precio_producto),
-                        "CMPETRM_FECHA": fecha_operacion,
-                        "CMPETRM_VENDEDOR": nit_vendedor.split("-")[0],
-                        "CMPETRM_MOTIVO": "01"
-                    }
-        cg1_json = json.dumps({
-            "CMPETRM_OC_NRO": self.name.replace(prefijo, "", 1),
-            "CMPETRM_IND_CLI": 2,
-            "CMPETRM_TERC": nit_cliente.split("-")[0],
-            "CMPETRM_SUC": id_sucursal,
-            "CMPETRM_FECHA": fecha_operacion,
-            "CMPETRM_CO": "001",
-            "CMPETRM_LOCAL": "03",
-            "Detalle": list(cg1_detalle.values())
-        })
+                    self.rfid_response = "FAILED. Respuesta inesperada del servicio."
+                    self.ribbon_error = True
+                    self.ribbon_visible = False
+                    self.response = response.text
+            except json.JSONDecodeError:
+                self.rfid_response = "FAILED. La respuesta no es un JSON válido."
+                self.ribbon_error = True
+                self.ribbon_visible = False
+                self.response = response.text
 
-        response = requests.request("POST", service_url, headers=headers, data=cg1_json)
+            cg1_json = json.dumps(cg1_json, indent=4)
 
-        if response.status_code == 200:
-            body_mensaje = Markup(f'<h2>¡Envío a CG1 Exitoso!</h2> <p>Se ha enviado la información a CG1, consulte la información en el sistema.</p>')
-            self.message_post(body=body_mensaje, message_type='notification')
-            self.rfid_response = "SUCCESS"
-            self.response = response.text
-        else:
-            self.rfid_response = "FAILED. Error " + str(response.status_code)
-            self.response = response.text
-
-        cg1_json_formated = json.dumps({
-            "CMPETRM_OC_NRO": self.name.replace(prefijo, "", 1),
-            "CMPETRM_IND_CLI": 2,
-            "CMPETRM_TERC": nit_cliente.split("-")[0],
-            "CMPETRM_SUC": id_sucursal,
-            "CMPETRM_FECHA": fecha_operacion,
-            "CMPETRM_CO": "001",
-            "CMPETRM_LOCAL": "03",
-            "Detalle": list(cg1_detalle.values())
-        }, indent=4)
-
-        return cg1_json_formated
+            self.json_generado = cg1_json
+            self.endpoint = service_url
+            self.is_executed = False
+        
+        return True
 
     # INFO: Método que envía la información a la URL expuesta de Henutsen 
     def _picking_service(self):
@@ -240,15 +263,6 @@ class StockInherit(models.Model):
             else:
                 self.rfid_response = "FAILED. Error " + str(response.status_code)
                 self.response = response.text
-        
-    # INFO: Método que ejecuta el controlador de la API REST para descargar el json de CG1
-    def generate_download_cg1(self):
-        url = f'/stock_picking_rest/download_txt/{self.id}'
-        return {
-            "type": "ir.actions.act_url",
-            "url": url,
-            "target": "download",
-        }
     
     # INFO: Método que envía la información de picking a la URL expuesta de Henutsen
     def send_picking_to_henutsen(self):
@@ -383,7 +397,7 @@ class StockInherit(models.Model):
                 es_salida = True
 
             record.send_button_visible = es_picking and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS"
-            record.cg1_button_visible = es_salida and record.state not in ('draft', 'confirmed', 'cancel', 'assigned')
+            record.cg1_button_visible = es_salida and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS"
             record.packing_button_visible = es_packing and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS"
 
     # INFO: Método que calcula la cantidad total de productos en la orden de salida (Para el vale de entrega) 
@@ -428,6 +442,5 @@ class StockInherit(models.Model):
             return config_params.get_bearer()
         else:
             return config_params.get_bearer_qa()
-              
 
-              
+        
