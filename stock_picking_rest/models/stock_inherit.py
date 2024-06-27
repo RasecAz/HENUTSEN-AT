@@ -442,5 +442,18 @@ class StockInherit(models.Model):
             return config_params.get_bearer()
         else:
             return config_params.get_bearer_qa()
-
         
+    def button_validate(self):
+        for move in self.move_ids:
+            if move.move_dest_ids and move.move_dest_ids.product_qty < move.quantity:
+                move.move_dest_ids.product_qty = move.quantity
+                move.move_dest_ids.quantity = move.quantity
+                # move.move_dest_ids.product_uom_qty = move.quantity
+        res = super(StockInherit, self).button_validate()
+        return res
+
+class StockMove(models.Model):
+    _inherit = 'stock.move'
+
+    def _set_product_qty(self):
+        return True
