@@ -82,6 +82,9 @@ class StockInherit(models.Model):
         operation_name = self.name
         operacion_origen = self.location_id.company_id.name
         operacion_destino = self.partner_id.name
+        for move in self.move_ids:
+            if move.move_dest_ids.reference:
+                operacion_packing = move.move_dest_ids.reference
 
         #Se recorre cada producto de la operación
         for product in self.move_ids.move_line_ids:
@@ -114,6 +117,7 @@ class StockInherit(models.Model):
                 })           
         data_json_picking= json.dumps({
             "consecutive": operation_name,
+            "packingConsecutive": operacion_packing,
             "sourceLocation": operacion_origen,
             "targetLocation": operacion_destino,
             "productList": product_list
@@ -451,6 +455,71 @@ class StockInherit(models.Model):
                 # move.move_dest_ids.product_uom_qty = move.quantity
         res = super(StockInherit, self).button_validate()
         return res
+    
+    @api.model
+    def send_packing(self, data):
+        context = self.env['stock.picking'].sudo().search([('name', '=', data['consecutive'])], limit=1)
+        if not context:
+            return {'error': f'No se encontró la operación de Packing {data["consecutive"]}. Revise el número de operación y vuelva a intentarlo.'}
+        for box_order in data['boxOrders']:
+            for product in box_order['productList']:
+                productos = self.env['product.product'].sudo().search([('default_code', '=', product['productSku'].rstrip())])
+                if len(productos) > 1 and 'variantList' not in product or len(productos) > 1 and product['variantList'] == []:
+                    return {'error': f"Se encontraron múltiples productos con el SKU [{product['productSku']}]. Revise el SKU o envíe las variantes del producto y vuelva a intentarlo."}
+                elif len(productos) > 1 and 'variantList' in product:
+                    producto_variante = False
+                    for producto in productos:
+                        all_variants_match = True
+                        for variant in product['variantList']:
+                            variant_match = producto.product_template_attribute_value_ids.filtered(
+                                lambda v: v.attribute_id.name == variant['name'] and v.name == variant['value']
+                            )
+                            if not variant_match:
+                                all_variants_match = False
+                                break
+
+                        if all_variants_match:
+                            producto_variante = producto
+                            break 
+                else:
+                    producto_variante = productos
+                if not producto_variante:
+                    return {'error': f"No se encontró el producto {product['productSku']} con las variantes definidas. Revise la variante, el Sku y vuelva a intentarlo."}
+                
+            if not 'batchNumber' in product or product['batchNumber'] == '':
+                lote = False
+            else:
+                lote = self.env['stock.lot'].sudo().search([('name', '=', product['batchNumber'])])
+                if lote:
+                    if not lote.product_id or lote.product_id.default_code != producto_variante.default_code:
+                        return {'error': f'El lote {product["batchNumber"]} no corresponde al producto {producto_variante.display_name}. Revise el lote y vuelva a intentarlo.'}
+                else:
+                    return {'error': f'No se encontró el lote {product["batchNumber"]}. Revise el valor enviado y vuelva a intentarlo.'}
+        boxes_list = []
+        for boxes in data['boxOrders']:
+            box_id = boxes['id']
+            boxes_list.append(box_id)
+        for box in boxes_list:
+            context.env['stock.quant.package'].sudo().create({'name': box})
+        return {
+            'success': f'Packing de productos para la operación {context.name} exitoso!'
+        }
+                # for move in context.move_ids_without_package:
+                #     if move.product_id.default_code == product['productSku']:
+                #         move.move_line_ids.write({'result_package_id': box})
+                #         move.move_line_ids.write({'lot_id': lote.id})
+                #         move.move_line_ids.write({'qty_done': product['quantity']})
+                #         move.move_line_ids.write({'product_qty': product['quantity']})
+                #         move.move_line_ids.write({'product_uom_qty': product['quantity']})
+                #         move.move_line_ids.write({'product_uom_id': producto_variante.uom_id.id})
+                #         move.move_line_ids.write({'product_id': producto_variante.id})
+                #         for variant in product['variantList']:
+                #             for value in producto_variante.product_template_attribute_value_ids:
+                #                 if value.attribute_id.name == variant['name']:
+                #                     if value.name == variant['value']:
+                #                         move.move_line_ids.write({'product_id': producto_variante.id})
+                #                     else:
+                #                         return {'error': f'No se encontró la variante {variant["value"]} en el producto {producto_variante.default_code}. Revise la variante y vuelva a intentarlo.'}     
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
