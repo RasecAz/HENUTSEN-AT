@@ -1,6 +1,7 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 import requests, json
+import os
 
 
 class StockQuant(models.Model):
@@ -97,8 +98,9 @@ class StockQuant(models.Model):
             data = []
             # Si el ajuste tiene un ID de ajuste, se envía la información a Henutsen, en caso contrario, solo se ajusta en Odoo
             if quant.id_ajuste:
-                bearer_token = quant.env['config.henutsen'].sudo().search([], order='id desc', limit=1).bearer_token
-                url_adjustment = quant.env['config.henutsen'].sudo().search([], order='id desc', limit=1).url_adjustment
+                config_params = quant.get_config_params()
+                url_adjustment = config_params['url_adjustment']
+                bearer_token = config_params['bearer_token']
                 service_url = f'{url_adjustment}?idAdjustment={quant.id_ajuste}'
                 headers = {
                     'Content-Type': 'application/json',
@@ -147,22 +149,30 @@ class StockQuant(models.Model):
         self.id_ajuste = False
         return res
     
-    # INFO: Método que obtiene el token de autorización para consumir los servicios de Henutsen
-    def get_bearer(self):
-        # Validar que exista la api_key y el email en el módulo de configuración Henutsen, en caso de que sea así, asigna los valores para obtener el token
-        if not self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).api_key or not self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).email_henutsen or not self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).url_bearer:
-            raise ValidationError('Faltan datos para obtener el token, completelos en la sección de Ajustes WS Henutsen, si no tiene acceso, solicitele a un administrador que actualice esta información')
-        api_key = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).api_key
-        email = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).email_henutsen
-        bearer_url = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).url_bearer
-        token_url = f'{bearer_url}/{email}?apiKey={api_key}'
-        response = requests.post(token_url)
-        # Validar que el token se haya obtenido correctamente
-        if response.status_code == 200:
-            response_json = response.json()
-            bearer_token = response_json["accessToken"]
-            self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).write({'bearer_token': bearer_token})
-            return bearer_token
-        # En caso de que no se haya obtenido el token, se genera error con información adicional
+    def get_config_params(self):
+        config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
+        if not config_params.api_key or not config_params.email_henutsen or not config_params.url_bearer or not config_params.url_adjustment:
+            raise ValidationError('Faltan datos en la configuración de Henutsen, valide que todos los campos estén completos, si no tiene acceso, solicitele a un administrador que actualice esta información')
+        if os.environ.get("ODOO_STAGE") == 'production':
+            bearer_token = config_params.bearer_token
+            if not bearer_token:
+                bearer_token = config_params.get_bearer()
+            return {
+                'url_adjustment': config_params.url_adjustment,
+                'bearer_token': bearer_token,
+            }
         else:
-            raise ValidationError('Error al obtener el token de autorización. Mensaje: ' + response.text + ". Valide la api_key y el email en la sección de Ajustes WS Henutsen, si no tiene acceso, solicitele a un administrador que actualice esta información")
+            bearer_token = config_params.bearer_token_qa
+            if not bearer_token:
+                bearer_token = config_params.get_bearer_qa()
+            return {
+                'url_adjustment': config_params.url_adjustment_qa,
+                'bearer_token': bearer_token,
+            }
+    
+    def get_bearer(self):
+        config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
+        if os.environ.get("ODOO_STAGE") == 'production':
+            return config_params.get_bearer()
+        else:
+            return config_params.get_bearer_qa()
