@@ -83,8 +83,10 @@ class StockInherit(models.Model):
         operacion_origen = self.location_id.company_id.name
         operacion_destino = self.partner_id.name
         for move in self.move_ids:
-            if move.move_dest_ids.reference:
+            if move.move_dest_ids and move.move_dest_ids.reference:
                 operacion_packing = move.move_dest_ids.reference
+            else:
+                operacion_packing = ""
 
         #Se recorre cada producto de la operación
         for product in self.move_ids.move_line_ids:
@@ -449,10 +451,12 @@ class StockInherit(models.Model):
         
     def button_validate(self):
         for move in self.move_ids:
-            if move.move_dest_ids and move.move_dest_ids.product_qty < move.quantity:
-                move.move_dest_ids.product_qty = move.quantity
-                move.move_dest_ids.quantity = move.quantity
-                # move.move_dest_ids.product_uom_qty = move.quantity
+            if move.move_dest_ids:
+                for move_dest_id in move.move_dest_ids:
+                    if move_dest_id.product_qty < move.quantity:
+                        move_dest_id.product_qty = move.quantity
+                        move_dest_id.quantity = move.quantity
+                        # move_dest_id.product_uom_qty = move.quantity
         res = super(StockInherit, self).button_validate()
         return res
     
