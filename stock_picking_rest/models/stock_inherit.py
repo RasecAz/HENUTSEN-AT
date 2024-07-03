@@ -43,10 +43,6 @@ class StockInherit(models.Model):
         default=False,
         compute='_compute_send_button_visible',
     )
-    packing_button_visible = fields.Boolean(
-        default=False,
-        compute='_compute_send_button_visible',
-    )
     endpoint = fields.Text(
         string='Endpoint',
         readonly=True
@@ -272,101 +268,7 @@ class StockInherit(models.Model):
     
     # INFO: Método que envía la información de picking a la URL expuesta de Henutsen
     def send_picking_to_henutsen(self):
-        self._picking_service()
-    
-    # INFO: Método que envía la información de packing a la URL expuesta de Henutsen
-    def send_packing_to_henutsen(self):
-        operation_name = self.name
-        operacion_origen = self.location_id.company_id.name
-        operacion_destino = self.partner_id.name
-        box_order = []
-        data_json_packing = {}
-        #self._packing_service()
-        for box_list in self.move_line_ids_without_package.mapped('result_package_id'):
-            box_id = box_list.name
-            product_list = []
-            for product in box_list.quant_ids:
-                referencia_producto = product.product_id.default_code
-                name_producto = product.product_id.name.rstrip()
-                cantidad_producto = product.quantity
-                variant_list = []
-                producto_lista = product.product_id.default_code
-                if product.product_id.product_tmpl_id.attribute_line_ids:
-                    for variant in product.product_id.product_tmpl_id.attribute_line_ids:
-                        tipo_variante = variant.attribute_id.name
-                        atributo_variante = ""
-                        refe = product.product_id.display_name
-                        attribute_values_string = refe.split("(")[1].split(")")[0]
-                        attribute_values = attribute_values_string.split(", ")
-                        #Se recorren los valores de las variantes y se comparan con los valores de la lista de variantes
-                        for lista in attribute_values:
-                            for value in variant.value_ids:
-                                if value.name in lista:
-                                    atributo_variante = value.name
-                        variant_list.append({
-                            "name": tipo_variante,
-                            "value": atributo_variante
-                        })
-                    product_list.append({
-                    "quantity": cantidad_producto,
-                    "productSku": referencia_producto,
-                    "variantList": variant_list
-                    })
-                #Si no existen variantes, no se incluye sección de variantList al json
-                else:
-                    product_list.append({
-                    "quantity": cantidad_producto,
-                    "productSku": referencia_producto
-                })
-            box_order.append({
-                "id": box_id,
-                "productList": product_list
-            })
-        
-        data_json_packing = json.dumps({
-            "consecutive": operation_name,
-            "sourceLocation": operacion_origen,
-            "targetLocation": operacion_destino,
-            "boxOrders": box_order
-        })
-        # IMPORTANTE: Todo debe estar configurado en la vista de configuración de Henutsen para que el web service funcione correctamente. El programa es capaz de reconfigurarse si el token expira.
-        self.json_generado = data_json_packing
-        config = self.get_config_params()
-        bearer_token = config['bearer_token']
-        service_url = config['url_packing']
-        self.endpoint = service_url
-        
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + bearer_token
-            }
-
-        # Preparación de la solicitud POST con el token
-        response = requests.request("POST",service_url, headers=headers, data=data_json_packing)
-
-        if response.status_code == 200:
-            # La solicitud fue exitosa, procesa la respuesta (json_response)
-            body_mensaje = Markup(f'<h2>¡Operación exitosa!</h2> <p>Se ha enviado la información a Henutsen.</p>')
-            self.message_post(body=body_mensaje, message_type='notification')
-            self.rfid_response = "SUCCESS"
-            self.response = response.text
-        else:
-            # La solicitud falló, maneja el error
-            bearer_token = self.get_bearer()
-            headers = {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + bearer_token
-            }
-            # Preparación de la solicitud POST con el token
-            response = requests.request("POST",service_url, headers=headers, data=data_json_packing)
-            if response.status_code == 200:
-                body_mensaje = Markup(f'<h2>¡Operación exitosa!</h2> <p>Se ha enviado la información a Henutsen.</p>')
-                self.message_post(body=body_mensaje, message_type='notification')
-                self.rfid_response = "SUCCESS"
-                self.response = response.text
-            else:
-                self.rfid_response = "FAILED. Error " + str(response.status_code)
-                self.response = response.text       
+        self._picking_service()    
         
     # INFO: Método que define si los botónes de envío a Henutsen y CG1 son visibles o no
     #  Picking es visible si:
@@ -404,7 +306,6 @@ class StockInherit(models.Model):
 
             record.send_button_visible = es_picking and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS"
             record.cg1_button_visible = es_salida and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS"
-            record.packing_button_visible = es_packing and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS"
 
     # INFO: Método que calcula la cantidad total de productos en la orden de salida (Para el vale de entrega) 
     @api.depends('state')
@@ -465,7 +366,11 @@ class StockInherit(models.Model):
         context = self.env['stock.picking'].sudo().search([('name', '=', data['consecutive'])], limit=1)
         if not context:
             return {'error': f'No se encontró la operación de Packing {data["consecutive"]}. Revise el número de operación y vuelva a intentarlo.'}
+        if context.state == 'done':
+            return {'error': f'La operación {context.name} ya ha sido validada. No es posible realizar el packing.'}
+        boxes_list = []
         for box_order in data['boxOrders']:
+            product_list = []
             for product in box_order['productList']:
                 productos = self.env['product.product'].sudo().search([('default_code', '=', product['productSku'].rstrip())])
                 if len(productos) > 1 and 'variantList' not in product or len(productos) > 1 and product['variantList'] == []:
@@ -490,40 +395,67 @@ class StockInherit(models.Model):
                 if not producto_variante:
                     return {'error': f"No se encontró el producto {product['productSku']} con las variantes definidas. Revise la variante, el Sku y vuelva a intentarlo."}
                 
-            if not 'batchNumber' in product or product['batchNumber'] == '':
-                lote = False
-            else:
-                lote = self.env['stock.lot'].sudo().search([('name', '=', product['batchNumber'])])
-                if lote:
-                    if not lote.product_id or lote.product_id.default_code != producto_variante.default_code:
-                        return {'error': f'El lote {product["batchNumber"]} no corresponde al producto {producto_variante.display_name}. Revise el lote y vuelva a intentarlo.'}
+                if not 'batchNumber' in product or product['batchNumber'] == '':
+                    lote = False
                 else:
-                    return {'error': f'No se encontró el lote {product["batchNumber"]}. Revise el valor enviado y vuelva a intentarlo.'}
-        boxes_list = []
-        for boxes in data['boxOrders']:
-            box_id = boxes['id']
-            boxes_list.append(box_id)
-        for box in boxes_list:
-            context.env['stock.quant.package'].sudo().create({'name': box})
-        return {
-            'success': f'Packing de productos para la operación {context.name} exitoso!'
-        }
-                # for move in context.move_ids_without_package:
-                #     if move.product_id.default_code == product['productSku']:
-                #         move.move_line_ids.write({'result_package_id': box})
-                #         move.move_line_ids.write({'lot_id': lote.id})
-                #         move.move_line_ids.write({'qty_done': product['quantity']})
-                #         move.move_line_ids.write({'product_qty': product['quantity']})
-                #         move.move_line_ids.write({'product_uom_qty': product['quantity']})
-                #         move.move_line_ids.write({'product_uom_id': producto_variante.uom_id.id})
-                #         move.move_line_ids.write({'product_id': producto_variante.id})
-                #         for variant in product['variantList']:
-                #             for value in producto_variante.product_template_attribute_value_ids:
-                #                 if value.attribute_id.name == variant['name']:
-                #                     if value.name == variant['value']:
-                #                         move.move_line_ids.write({'product_id': producto_variante.id})
-                #                     else:
-                #                         return {'error': f'No se encontró la variante {variant["value"]} en el producto {producto_variante.default_code}. Revise la variante y vuelva a intentarlo.'}     
+                    lote = self.env['stock.lot'].sudo().search([('name', '=', product['batchNumber'])])
+                    if lote:
+                        if not lote.product_id or lote.product_id.default_code != producto_variante.default_code:
+                            return {'error': f'El lote {product["batchNumber"]} no corresponde al producto {producto_variante.display_name}. Revise el lote y vuelva a intentarlo.'}
+                    else:
+                        return {'error': f'No se encontró el lote {product["batchNumber"]}. Revise el valor enviado y vuelva a intentarlo.'}
+                product_list.append({
+                    'product_id': producto_variante,
+                    'lot_id': lote,
+                    'quantity': product['quantity']
+                })
+            boxes_list.append({
+                'id': box_order['id'],
+                'product_list': product_list
+            })
+        try:
+            for move in context.move_ids:
+                move.move_line_ids.sudo().unlink()
+            for box in boxes_list:
+                box_id = context.env['stock.quant.package'].sudo().create({'name': box['id']})
+                for product in box['product_list']:
+                    move_context = context.move_ids.filtered(lambda m: m.product_id.id == product['product_id'].id)
+                    if move_context:
+                        context.move_line_ids.create({
+                            'picking_id': context.id,
+                            'move_id': move_context.id,
+                            'product_id': product['product_id'].id,
+                            'location_dest_id': context.location_dest_id.id,
+                            'location_id': context.location_id.id,
+                            'lot_id': product['lot_id'].id if product['lot_id'] else False,
+                            'quantity': product['quantity'],
+                            'quantity_product_uom': product['quantity'],
+                            'result_package_id': box_id.id
+                        })
+            body_mensaje = Markup(
+                f'''
+                <h2>¡Packing Exitoso!</h2>
+                <p>Se han recibido las líneas de empaquetado desde Henutsen</p>
+                <ul>
+                    <li>Operación: {context.name}</li>
+                    <li><strong>Cajas:</strong>
+                        <ul>
+                            {''.join([f"<li>Caja {box['id']}:" +
+                                    "<ul>" +
+                                    ''.join([f"<li>Producto: {product['product_id'].name}, Lote: '{product['lot_id'].name if product['lot_id'] != False else 'Sin lote'}', Cantidad: {product['quantity']} Unidades.</li>" for product in box['product_list']]) +
+                                    "</ul></li>" for box in boxes_list])}
+                        </ul>
+                    </li>
+                </ul>
+                '''
+            )
+            context.message_post(body=body_mensaje, message_type='notification')
+            context.rfid_response = "SUCCESS_PACKING"
+            return {
+                'success': f'Packing de productos para la operación {context.name} exitoso!'
+            }     
+        except ValidationError as e:
+            return {'error': f'Error al crear el packing. Detalles: {e}. Intente nuevamente.'}
 
 class StockMove(models.Model):
     _inherit = 'stock.move'

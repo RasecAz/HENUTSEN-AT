@@ -1,25 +1,25 @@
 
 # -*- coding: utf-8 -*-
 # ---------------------------------
-# Módulo Henutsen RFID - Aristextil
+# Henutsen RFID System
 # ---------------------------------
-# Este módulo proporciona una integración de RFID en Odoo. Además de algunos ajustes y validaciones en los módulos de stock, sale y purchase, todo bajo solicitud de Aristextil.
-# El módulo incluye funcionalidades a los módulos base mencionados, proporciona vistas personalizadas y reportes para facilitar la gestión de estos elementos.
-# Depende de los módulos 'base', 'stock', 'product', 'sale' y 'purchase' para su correcto funcionamiento.
-# Autor: Wilson Contreras - Audisoft Consulting
-# Versión: 17.0.0.1
+# This module provides an RFID integration in Odoo. In addition to some adjustments and validations in the stock, sale and purchase modules, all under Aristextil's request.
+# The module includes functionalities to the mentioned base modules, provides custom views and reports to facilitate the management of these elements.
+# It depends on the 'base', 'stock', 'product', 'sale' and 'purchase' modules for its correct operation.
+# Version: 17.0.0.1
 {
-    'name': "Henutsen RFID - Aristextil",
+    'name': "Henutsen RFID System",
 
-    'summary': "Módulo para la integración de RFID en Odoo",
+    'summary': "Module for Henutsen-RFID integration in Odoo",
 
-    'author': "Wilson Contreras - Audisoft Consulting",
+    'author': "Audisoft Consulting",
+    'website': "https://www.audisoft.com/",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': '0.1',
+    'version': '17.0.1.2',
 
     # any module necessary for this one to work correctly
     'depends': ['base','stock','contacts', 'sale', 'purchase'],
@@ -37,6 +37,7 @@
         'views/product_attribute_view.xml',
         'reports/report_deliveryslip.xml',
     ],
+    'application': True,
     'license': 'LGPL-3',
 }
 
