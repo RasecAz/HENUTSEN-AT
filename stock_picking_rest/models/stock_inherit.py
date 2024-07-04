@@ -1,6 +1,9 @@
 import json
 import requests
 import os
+import logging
+
+_logger = logging.getLogger(__name__)
 
 from odoo import SUPERUSER_ID, _, fields, models, api
 from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
@@ -16,19 +19,19 @@ class StockInherit(models.Model):
 # ------------------------------------------------------------------------------------------------
 
     rfid_response = fields.Char(
-        string='Resultado envío',
+        string='Request state',
         readonly=True
     )
     response = fields.Char(
-        string='Respuesta envío',
+        string='Request response',
         readonly=True
     )
     bearer = fields.Char(
-        string='Resultado Bearer Token',
+        string='Bearer token',
         readonly=True
     )
     json_generado = fields.Text(
-        string='Json generado',
+        string='Generated JSON',
         readonly=True
     )
     api_key = fields.Text(
@@ -48,7 +51,7 @@ class StockInherit(models.Model):
         readonly=True
     )
     total_order = fields.Float(
-        string='Total productos',
+        string='Total products',
         compute='_compute_total_order',
         store=True
     )
@@ -197,23 +200,24 @@ class StockInherit(models.Model):
             try:
                 response_json = response.json()
                 if response.status_code == 200 and "ok" in response_json:
-                    body_mensaje = Markup(f'<h2>¡Envío a CG1 Exitoso!</h2> <p>Se ha enviado la información a CG1, consulte la información en el sistema.</p>')
+                    # trad: <h2>¡Envío a CG1 Exitoso!</h2> <p>Se ha enviado la información a CG1, consulte la información en el sistema.</p>
+                    body_mensaje = Markup(_(f'<h2>CG1 Shipment Successful!</h2> <p>The information has been sent to CG1, check the information in the system.</p>'))
                     self.message_post(body=body_mensaje, message_type='notification')
                     self.rfid_response = "SUCCESS"
                     self.ribbon_visible = True
                     self.response = response.text
                 elif "error" in response_json or "detail" in response_json:
-                    self.rfid_response = "FAILED. Error en la respuesta del servicio."
+                    self.rfid_response = _("FAILED. Error in the response request.")
                     self.ribbon_error = True
                     self.ribbon_visible = False
                     self.response = response.text
                 else:
-                    self.rfid_response = "FAILED. Respuesta inesperada del servicio."
+                    self.rfid_response = _("FAILED. Unknown error in the response request.")
                     self.ribbon_error = True
                     self.ribbon_visible = False
                     self.response = response.text
             except json.JSONDecodeError:
-                self.rfid_response = "FAILED. La respuesta no es un JSON válido."
+                self.rfid_response = _("FAILED. Error decoding the response.")
                 self.ribbon_error = True
                 self.ribbon_visible = False
                 self.response = response.text
@@ -244,7 +248,8 @@ class StockInherit(models.Model):
 
         if response.status_code == 200:
             # La solicitud fue exitosa, procesa la respuesta (json_response)
-            body_mensaje = Markup(f'<h2>¡Generación de códigos RFID en Henutsen exitosa!</h2> <p>Se ha enviado la información a Henutsen, inicie el proceso de etiquetado.</p>')
+            # TRAD: <h2>¡Generación de códigos RFID en Henutsen exitosa!</h2> <p>Se ha enviado la información a Henutsen, inicie el proceso de etiquetado.</p>
+            body_mensaje = Markup(f'<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information has been sent to Henutsen, start the labeling process.</p>')
             self.message_post(body=body_mensaje, message_type='notification')
             self.rfid_response = "SUCCESS"
             self.response = response.text
@@ -258,7 +263,8 @@ class StockInherit(models.Model):
             response = requests.request("POST",service_url, headers=headers, data=data_json)
 
             if response.status_code == 200:
-                body_mensaje = Markup(f'<h2>¡Generación de códigos RFID en Henutsen exitosa!</h2> <p>Se ha enviado la información a Henutsen, inicie el proceso de etiquetado.</p>')
+                # TRAD: <h2>¡Generación de códigos RFID en Henutsen exitosa!</h2> <p>Se ha enviado la información a Henutsen, inicie el proceso de etiquetado.</p>
+                body_mensaje = Markup(f'<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information has been sent to Henutsen, start the labeling process.</p>')
                 self.message_post(body=body_mensaje, message_type='notification')
                 self.rfid_response = "SUCCESS"
                 self.response = response.text
@@ -320,7 +326,7 @@ class StockInherit(models.Model):
     def get_config_params(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
         if not config_params.api_key or not config_params.email_henutsen or not config_params.url_bearer or not config_params.url_picking or not config_params.url_packing:
-            raise ValidationError('Faltan datos en la configuración de Henutsen, valide que todos los campos estén completos, si no tiene acceso, solicitele a un administrador que actualice esta información')
+            raise ValidationError(_('Missing data in Henutsen configuration, validate that all fields are complete, if you do not have access, ask an administrator to update this information'))
         if os.environ.get("ODOO_STAGE") == 'production':
             bearer_token = config_params.bearer_token
             if not bearer_token:
@@ -330,7 +336,6 @@ class StockInherit(models.Model):
                 'url_packing': config_params.url_packing,
                 'url_cg1': config_params.url_cg1,
                 'bearer_token': bearer_token,
-
             }
         else:
             bearer_token = config_params.bearer_token_qa
@@ -363,18 +368,20 @@ class StockInherit(models.Model):
     
     @api.model
     def send_packing(self, data):
+        json_str = json.dumps(data)
+        _logger.info(json_str)
         context = self.env['stock.picking'].sudo().search([('name', '=', data['consecutive'])], limit=1)
         if not context:
-            return {'error': f'No se encontró la operación de Packing {data["consecutive"]}. Revise el número de operación y vuelva a intentarlo.'}
+            return {'error': _(f'No Packing operation {data["consecutive"]} found. Check the operation number and try again.')}
         if context.state == 'done':
-            return {'error': f'La operación {context.name} ya ha sido validada. No es posible realizar el packing.'}
+            return {'error': _(f'The operation {context.name} has already been validated. It is not possible to perform the packing.')}
         boxes_list = []
         for box_order in data['boxOrders']:
             product_list = []
-            for product in box_order['productList']:
+            for product in box_order['productList'] if 'productList' in box_order else box_order['ProductList']:
                 productos = self.env['product.product'].sudo().search([('default_code', '=', product['productSku'].rstrip())])
                 if len(productos) > 1 and 'variantList' not in product or len(productos) > 1 and product['variantList'] == []:
-                    return {'error': f"Se encontraron múltiples productos con el SKU [{product['productSku']}]. Revise el SKU o envíe las variantes del producto y vuelva a intentarlo."}
+                    return {'error': _(f"Multiple products with the same SKU [{product['productSku']}] were found. Check the SKU or send the product variants and try again.")}
                 elif len(productos) > 1 and 'variantList' in product:
                     producto_variante = False
                     for producto in productos:
@@ -393,7 +400,7 @@ class StockInherit(models.Model):
                 else:
                     producto_variante = productos
                 if not producto_variante:
-                    return {'error': f"No se encontró el producto {product['productSku']} con las variantes definidas. Revise la variante, el Sku y vuelva a intentarlo."}
+                    return {'error': _(f"The product {product['productSku']} was not found with the defined variants. Check the variant, SKU and try again.")}
                 
                 if not 'batchNumber' in product or product['batchNumber'] == '':
                     lote = False
@@ -401,9 +408,9 @@ class StockInherit(models.Model):
                     lote = self.env['stock.lot'].sudo().search([('name', '=', product['batchNumber'])])
                     if lote:
                         if not lote.product_id or lote.product_id.default_code != producto_variante.default_code:
-                            return {'error': f'El lote {product["batchNumber"]} no corresponde al producto {producto_variante.display_name}. Revise el lote y vuelva a intentarlo.'}
+                            return {'error': _(f"The batch {product['batchNumber']} does not correspond to the product {producto_variante.display_name}. Check the batch and try again.")}
                     else:
-                        return {'error': f'No se encontró el lote {product["batchNumber"]}. Revise el valor enviado y vuelva a intentarlo.'}
+                        return {'error': _(f"The batch {product['batchNumber']} was not found. Check the value sent and try again.")}
                 product_list.append({
                     'product_id': producto_variante,
                     'lot_id': lote,
@@ -432,9 +439,10 @@ class StockInherit(models.Model):
                             'quantity_product_uom': product['quantity'],
                             'result_package_id': box_id.id
                         })
+                        # english: 
             body_mensaje = Markup(
-                f'''
-                <h2>¡Packing Exitoso!</h2>
+                _(f'''
+                <h2>¡Proceso de Packing Exitoso!</h2>
                 <p>Se han recibido las líneas de empaquetado desde Henutsen</p>
                 <ul>
                     <li>Operación: {context.name}</li>
@@ -448,14 +456,15 @@ class StockInherit(models.Model):
                     </li>
                 </ul>
                 '''
-            )
+            ))
             context.message_post(body=body_mensaje, message_type='notification')
             context.rfid_response = "SUCCESS_PACKING"
+            # english: 
             return {
-                'success': f'Packing de productos para la operación {context.name} exitoso!'
+                'success': _(f'Packing of products for operation {context.name} successful!')
             }     
         except ValidationError as e:
-            return {'error': f'Error al crear el packing. Detalles: {e}. Intente nuevamente.'}
+            return {'error': _(f'Error creating the packing. Details: {e}. Try again.')}
 
 class StockMove(models.Model):
     _inherit = 'stock.move'

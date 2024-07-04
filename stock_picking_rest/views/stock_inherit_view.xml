@@ -12,13 +12,13 @@
             <xpath expr="//sheet/div[@name='button_box']" position="before">
                 <field name="ribbon_visible" invisible="1"/>
                 <field name="ribbon_error" invisible="1"/>
-                <widget name="web_ribbon" title="Enviado a Henutsen" bg_color="text-bg-info" invisible="rfid_response != 'SUCCESS'"/>
-                <widget name="web_ribbon" title="Packing Recibido" bg_color="text-bg-success" invisible="rfid_response != 'SUCCESS_PACKING'"/>
-                <widget name="web_ribbon" title="Enviado a CG1" bg_color="text-bg-info" invisible="not ribbon_visible"/>
-                <widget name="web_ribbon" title="Envío Errado" bg_color="text-bg-danger" invisible="not ribbon_error"/>
+                <widget name="web_ribbon" title="Sent to Henutsen" bg_color="text-bg-info" invisible="rfid_response != 'SUCCESS'"/>
+                <widget name="web_ribbon" title="Packing received" bg_color="text-bg-success" invisible="rfid_response != 'SUCCESS_PACKING'"/>
+                <widget name="web_ribbon" title="Sent to CG1" bg_color="text-bg-info" invisible="not ribbon_visible"/>
+                <widget name="web_ribbon" title="Wrong Sending" bg_color="text-bg-danger" invisible="not ribbon_error"/>
             </xpath>
             <xpath expr='//notebook' position="inside">
-                <page name="conectionpage" string="Conexión Henutsen" groups="base.group_no_one">
+                <page name="conectionpage" string="Henutsen Connection" groups="base.group_no_one">
                     <group>
                         <field name="api_key" />
                         <field name="bearer" />
@@ -32,8 +32,9 @@
             <xpath expr="//button[@name='button_validate']" position="after">
                 <field name="send_button_visible" invisible="1"/>
                 <field name="cg1_button_visible" invisible="1"/>
-                <button name="send_picking_to_henutsen" invisible="not send_button_visible" string="Generar códigos RFID en Henutsen" type="object" class="oe_highlight"/>
-                <button name="send_operation_to_cg1" invisible="not cg1_button_visible" string="Enviar a CG1" type="object" class="oe_highlight"/>
+                <!-- english: generate RFID codes in Henutsen -->
+                <button name="send_picking_to_henutsen" invisible="not send_button_visible" string="Generate RFID codes in Henutsen" type="object" class="oe_highlight"/>
+                <button name="send_operation_to_cg1" invisible="not cg1_button_visible" string="Send to CG1" type="object" class="oe_highlight"/>
             </xpath>
             <xpath expr="//group[@name='other_infos']" position="inside">
                 <field name="total_order" invisible="state != 'done'" />

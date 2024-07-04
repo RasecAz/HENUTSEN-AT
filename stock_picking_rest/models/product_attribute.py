@@ -35,11 +35,11 @@ class ProductAttribute(models.Model):
             }
             response = requests.post(service_url, headers=headers, data=json_henutsen)
             if response.status_code == 200:
-                _logger.info('Variantes enviadas a Henutsen')
+                _logger.info(_('Variants sent successfully'))
             else:
-                _logger.warning(f'Error al enviar variantes a Henutsen: {response.text}')
+                _logger.warning(_(f'Error sending variants to Henutsen: {response.text}'))
         else:
-            _logger.info('Variantes enviadas a Henutsen')
+            _logger.info(_('Variants sent successfully'))
     
     def get_config_params(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
