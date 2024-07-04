@@ -7,108 +7,107 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
-body {
-    font-family: "Poppins", sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #4DBCC3;
-}
+        body {
+            font-family: "Poppins", sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #4DBCC3;
+        }
 
-h1 {
-    background-color: #4DBCC3;
-    font-family: "Poppins", sans-serif;
-    color: #DDD;
-    padding: 10px 0;
-    text-align: center;
-}
+        h1 {
+            background-color: #4DBCC3;
+            font-family: "Poppins", sans-serif;
+            color: #DDD;
+            padding: 10px 0;
+            text-align: center;
+        }
 
-h2 {
-    color: #FFF;
-    margin-top: 20px;
-}
+        h2 {
+            color: #FFF;
+            margin-top: 20px;
+        }
 
-p {
-    color: #DDD;
-    line-height: 1.6;
-}
+        p {
+            color: #DDD;
+            line-height: 1.6;
+        }
 
-img {
-    display: block;
-    margin: 20px auto;
-    max-width: 100%;
-    height: auto;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-}
+        img {
+            display: block;
+            margin: 20px auto;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
 
-ol, ul {
-    padding-left: 30px;
-    margin: 20px 0;
-    background-color: #f9f9f9;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-}
+        ol, ul {
+            padding-left: 30px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
 
-ol {
-    background-color: #2d9ea7;
-}
+        ol {
+            background-color: #2d9ea7;
+        }
 
-ol > li, ul > li {
-    padding: 10px;
-    border-bottom: 1px solid #DDD;
-}
+        ol > li, ul > li {
+            padding: 10px;
+            border-bottom: 1px solid #DDD;
+        }
 
-ol > li {
-    color:#DDD;
-}
+        ol > li {
+            color:#DDD;
+        }
 
-ol > li:last-child, ul > li:last-child {
-    border-bottom: none;
-}
+        ol > li:last-child, ul > li:last-child {
+            border-bottom: none;
+        }
 
-ul > li {
-    list-style-type: disc;
-}
+        ul > li {
+            list-style-type: disc;
+        }
 
-ol > li {
-    counter-increment: item;
-}
+        ol > li {
+            counter-increment: item;
+        }
 
-.content {
-    background-color: #2d9ea7;
-    border-radius: 5px;
-    padding: 20px;
-    margin: 20px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
-}
+        .content {
+            background-color: #2d9ea7;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
 
-.content h2 {
-    color: #FFF;
-    margin-bottom: 10px;
-}
+        .content h2 {
+            color: #FFF;
+            margin-bottom: 10px;
+        }
 
-.content ul {
-    color:#2d9ea7;
-}
+        .content ul {
+            color:#2d9ea7;
+        }
 
-.content ul li {
-    padding: 10px 0;
-}
+        .content ul li {
+            padding: 10px 0;
+        }
 
-.content ul li a {
-    color: #2d9ea7;
-    text-decoration: none;
-}
+        .content ul li a {
+            color: #2d9ea7;
+            text-decoration: none;
+        }
 
-.content ul li a:hover {
-    color: #4DBCC3;
-    text-decoration: underline;
-}
-ol > ul > li {
-    color:#2d9ea7;
-}
-
+        .content ul li a:hover {
+            color: #4DBCC3;
+            text-decoration: underline;
+        }
+        ol > ul > li {
+            color:#2d9ea7;
+        }
     </style>
 </head>
     <body>
@@ -127,25 +126,34 @@ ol > ul > li {
             This module allows users to manage the inventory of products using RFID technology with Henutsen system.
             The module has a bidirectional integration with the Henutsen system, allowing the user to manage the inventory of products in Odoo the easy way.
         </p>
-        <h2 id="how-to-use">How to use</h2>
+        <h2 id="how-to-use">How to use & Improvements</h2>
         <p>
-            Picking service
+            To use the Henutsen RFID System module, you must simply install it in your Odoo instance.
+            After installing the module, you must configure the Henutsen system credentials in the Odoo settings.
         </p>
-        <img src="images/image1.png" alt="Image 1" width="500px"/>
-        <img src="images/image2.png" alt="Image 2" width="500px"/>
+        <img src="images/image1.png" alt="Image 1" width="700px"/>
+        <br>
+        <img src="images/image2.png" alt="Image 2" width="700px"/>
         <p>
-            Configure the users who can close the cash register with differences in the employee module.
+            The system is able to determine if the Odoo instance is production or test, so please configure the system accordingly.
         </p>
-        <img src="images/pos_close_session_guavana1.jpg" alt="Image 1" width="800px"/>
         <p>
-            In the Point of Sale configuration section, you can select the default format for downloading reports.
+            To use the Sales approval flow, you must configure the users that will be able to approve sales in the users configuration section.
         </p>
-        <img src="images/pos_close_session_guavana9.jpg" alt="Image 9" width="800px"/>
+        <img src="images/image3.jpg" alt="Image 3" width="700px"/>
         <p>
-            In the payment methods section, you can configure the maximum difference allowed for each payment method.
+            The system will be show the user in the picking operation, the button to send the picking to the Henutsen system.
+            This feature is only available for operations with a company branch as a destination location.
         </p>
-        <img src="images/pos_close_session_guavana11.jpg" alt="Image 11" width="800px"/>
-        <img src="images/pos_close_session_guavana12.jpg" alt="Image 12" width="800px"/>
+        <img src="images/image4.jpg" alt="Image 4" width="700px"/>
+        <p>
+            The system will show a ribbon in the picking operation view if the process was successful.
+        </p>
+        <img src="images/image5.jpg" alt="Image 5" width="700px"/>
+        <p>
+            The module also has a integration with CG1 system, allowing to manage the accounting of the company with this system.
+        </p>
+        <img src="images/image6.jpg" alt="Image 6" width="700px">
         <h2 id="improvements">Improvements</h2>
         <p>
             POS Close Session Guavana is a module that improves the operation of the Odoo POS module.

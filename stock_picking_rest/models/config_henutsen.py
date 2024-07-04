@@ -31,6 +31,9 @@ class ConfigHenutsenWizard(models.Model):
     url_cg1 = fields.Char(
         string = 'Url CG1'
     )
+    url_product = fields.Char(
+        string = 'Url Product'
+    )
     api_key = fields.Text(
         string = 'Api user key'
     )
@@ -62,6 +65,9 @@ class ConfigHenutsenWizard(models.Model):
     )
     url_cg1_qa = fields.Char(
         string = 'Url CG1 QA'
+    )
+    url_product_qa = fields.Char(
+        string = 'Url Product QA'
     )
     api_key_qa = fields.Text(
         string = 'Api user Key QA'
@@ -109,6 +115,7 @@ class ConfigHenutsenWizard(models.Model):
             'url_adjustment': self.url_adjustment,
             'url_variants': self.url_variants,
             'url_cg1': self.url_cg1,
+            'url_product': self.url_product,
             'api_key': self.api_key,
             'special_branch': self.special_branch,
             'email_henutsen': self.email_henutsen,
@@ -119,6 +126,7 @@ class ConfigHenutsenWizard(models.Model):
             'url_adjustment_qa': self.url_adjustment_qa,
             'url_variants_qa': self.url_variants_qa,
             'url_cg1_qa': self.url_cg1_qa,
+            'url_product_qa': self.url_product_qa,
             'api_key_qa': self.api_key_qa,
             'special_branch_qa': self.special_branch_qa,
             'email_henutsen_qa': self.email_henutsen_qa,
@@ -195,6 +203,7 @@ class ConfigHenutsenWizard(models.Model):
         defaults['url_adjustment'] = config.url_adjustment if config else None
         defaults['url_variants'] = config.url_variants if config else None
         defaults['url_cg1'] = config.url_cg1 if config else None
+        defaults['url_product'] = config.url_product if config else None
         defaults['url_bearer_qa'] = config.url_bearer_qa if config else None
         defaults['url_picking_qa'] = config.url_picking_qa if config else None
         defaults['url_packing_qa'] = config.url_packing_qa if config else None
@@ -205,6 +214,7 @@ class ConfigHenutsenWizard(models.Model):
         defaults['url_adjustment_qa'] = config.url_adjustment_qa if config else None
         defaults['url_variants_qa'] = config.url_variants_qa if config else None
         defaults['url_cg1_qa'] = config.url_cg1_qa if config else None
+        defaults['url_product_qa'] = config.url_product_qa if config else None
         defaults['state'] = config.state if config else 'draft'
         return defaults
     

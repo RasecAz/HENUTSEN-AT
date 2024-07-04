@@ -29,6 +29,7 @@
                                 <field name="url_variants" readonly="state == 'done'" />
                                 <field name="url_adjustment" readonly="state == 'done'" />
                                 <field name="url_cg1" readonly="state == 'done'" />
+                                <field name="url_product" readonly="state == 'done'" />
                                 <field name="email_henutsen" readonly="state == 'done'" />
                                 <field name="special_branch" readonly="state == 'done'" />  
                                 <field name="api_key" readonly="state == 'done'" />
@@ -44,6 +45,7 @@
                                 <field name="url_variants_qa" readonly="state == 'done'" />
                                 <field name="url_adjustment_qa" readonly="state == 'done'" />
                                 <field name="url_cg1_qa" readonly="state == 'done'" />
+                                <field name="url_product_qa" readonly="state == 'done'" />
                                 <field name="email_henutsen_qa" readonly="state == 'done'" />
                                 <field name="special_branch_qa" readonly="state == 'done'" />  
                                 <field name="api_key_qa" readonly="state == 'done'" />
