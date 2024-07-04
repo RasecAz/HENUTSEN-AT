@@ -405,12 +405,9 @@ class StockInherit(models.Model):
                 if not 'batchNumber' in product or product['batchNumber'] == '':
                     lote = False
                 else:
-                    lote = self.env['stock.lot'].sudo().search([('name', '=', product['batchNumber'])])
-                    if lote:
-                        if not lote.product_id or lote.product_id.default_code != producto_variante.default_code:
-                            return {'error': _(f"The batch {product['batchNumber']} does not correspond to the product {producto_variante.display_name}. Check the batch and try again.")}
-                    else:
-                        return {'error': _(f"The batch {product['batchNumber']} was not found. Check the value sent and try again.")}
+                    lote = self.env['stock.lot'].sudo().search([('name', '=', product['batchNumber']), ('product_id.id', '=', producto_variante.id)])
+                    if not lote:
+                        return {'error': _(f"The batch {product['batchNumber']} was not found or doesnt exist. Check the value sent and try again.")}
                 product_list.append({
                     'product_id': producto_variante,
                     'lot_id': lote,
