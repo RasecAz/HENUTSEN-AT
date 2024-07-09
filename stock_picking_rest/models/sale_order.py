@@ -8,7 +8,7 @@ class SaleOrder(models.Model):
 # --------------------------------------------------------------------------------
 
     state = fields.Selection(selection_add=[
-        ('pending', 'Pendiente de Aprobación'),
+        ('pending', 'Pending Approval'),
     ])
     
     button_confirm_invisible = fields.Boolean(

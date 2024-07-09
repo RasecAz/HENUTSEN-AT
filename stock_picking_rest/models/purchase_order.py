@@ -9,20 +9,20 @@ class PurchaseOrderLine(models.Model):
 # --------------------------------------------------------------------------------
 
     price_in_pricelist = fields.Monetary(
-        string = "Precio en lista",
+        string = "Price in pricelist",
         compute='_compute_price_in_pricelist'
     )
 
     stock_in_warehouse = fields.Float(
-        string = "Stock en planta",
+        string = "Stock in warehouse",
         compute='_compute_price_in_pricelist'
     )
 
     stock_state = fields.Selection(
         selection = [
-            ('available', 'Disponible'),
-            ('not_available', 'No disponible'),
-            ('in_zero', 'En cero')
+            ('available', 'avaliable'),
+            ('not_available', 'not avaliable'),
+            ('in_zero', 'in zero')
         ],
         default = 'available',
     )
@@ -75,5 +75,4 @@ class PurchaseOrderLine(models.Model):
                 line.stock_state = 'in_zero'
             else:
                 line.stock_state = 'available'
-            
-# decoration-danger="state not in ('done', 'cancel') and scheduled_date &lt; current_date"
+                
