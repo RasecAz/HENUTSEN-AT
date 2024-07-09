@@ -119,6 +119,7 @@ class StockInherit(models.Model):
         data_json_picking= json.dumps({
             "consecutive": operation_name,
             "packingConsecutive": operacion_packing,
+            "saleOrder": self.origin,
             "sourceLocation": operacion_origen,
             "targetLocation": operacion_destino,
             "productList": product_list
@@ -421,7 +422,11 @@ class StockInherit(models.Model):
             for move in context.move_ids:
                 move.move_line_ids.sudo().unlink()
             for box in boxes_list:
-                box_id = context.env['stock.quant.package'].sudo().create({'name': box['id']})
+                try:
+                    weight = float(box['weight']) if 'weight' in box else 0.0
+                except ValueError:
+                    weight = 0.0
+                box_id = context.env['stock.quant.package'].sudo().create({'name': box['id'],'package_weight': weight})
                 for product in box['product_list']:
                     move_context = context.move_ids.filtered(lambda m: m.product_id.id == product['product_id'].id)
                     if move_context:
@@ -436,11 +441,10 @@ class StockInherit(models.Model):
                             'quantity_product_uom': product['quantity'],
                             'result_package_id': box_id.id
                         })
-                        # english: 
             body_mensaje = Markup(
                 _(f'''
-                <h2>¡Proceso de Packing Exitoso!</h2>
-                <p>Se han recibido las líneas de empaquetado desde Henutsen</p>
+                <h2>¡Productos empacados exitosamente!</h2>
+                <p>Los productos se han empacado desde Henutsen, valide la orden y continue con el despacho.</p>
                 <ul>
                     <li>Operación: {context.name}</li>
                     <li><strong>Cajas:</strong>
