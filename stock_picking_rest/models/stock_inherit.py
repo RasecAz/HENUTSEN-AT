@@ -416,6 +416,7 @@ class StockInherit(models.Model):
                 })
             boxes_list.append({
                 'id': box_order['id'],
+                'weight': box_order['weight'],
                 'product_list': product_list
             })
         try:
@@ -423,7 +424,7 @@ class StockInherit(models.Model):
                 move.move_line_ids.sudo().unlink()
             for box in boxes_list:
                 try:
-                    weight = float(box['weight']) if 'weight' in box else 0.0
+                    weight = float(box['weight']) if box['weight'] else 0.0
                 except ValueError:
                     weight = 0.0
                 box_id = context.env['stock.quant.package'].sudo().create({'name': box['id'],'package_weight': weight})
@@ -451,7 +452,7 @@ class StockInherit(models.Model):
                         <ul>
                             {''.join([f"<li>Caja {box['id']}:" +
                                     "<ul>" +
-                                    ''.join([f"<li>Producto: {product['product_id'].name}, Lote: '{product['lot_id'].name if product['lot_id'] != False else 'Sin lote'}', Cantidad: {product['quantity']} Unidades.</li>" for product in box['product_list']]) +
+                                    ''.join([f"<li>Producto: {product['product_id'].display_name}, Lote: '{product['lot_id'].name if product['lot_id'] != False else 'Sin lote'}', Cantidad: {product['quantity']} Unidades.</li>" for product in box['product_list']]) +
                                     "</ul></li>" for box in boxes_list])}
                         </ul>
                     </li>
@@ -460,12 +461,89 @@ class StockInherit(models.Model):
             ))
             context.message_post(body=body_mensaje, message_type='notification')
             context.rfid_response = "SUCCESS_PACKING"
-            # english: 
             return {
                 'success': _(f'Packing of products for operation {context.name} successful!')
             }     
         except ValidationError as e:
             return {'error': _(f'Error creating the packing. Details: {e}. Try again.')}
+    
+    @api.model
+    def receive_order(self, data):
+        context = self.env['stock.picking'].sudo().search([('purchase_id.partner_ref', '=', data['consecutive']),('picking_type_id.sequence_code', '=', 'IN')], limit=1)
+        if not context:
+            return {'error': _(f'No picking order found with sale order {data["consecutive"]}. Check the order number and try again.')}
+        if context.state == 'done':
+            return {'error': _(f'The operation {context.name} has already been validated. It is not possible to perform the reception.')}
+        product_list = []
+        for product in data['productList']:
+            productos = self.env['product.product'].sudo().search([('default_code', '=', product['productSku'].rstrip())])
+            if len(productos) > 1 and 'variantList' not in product or len(productos) > 1 and product['variantList'] == []:
+                return {'error': _(f"Multiple products with the same SKU [{product['productSku']}] were found. Check the SKU or send the product variants and try again.")}
+            elif len(productos) > 1 and 'variantList' in product:
+                producto_variante = False
+                for producto in productos:
+                    all_variants_match = True
+                    for variant in product['variantList']:
+                        variant_match = producto.product_template_attribute_value_ids.filtered(
+                            lambda v: v.attribute_id.name == variant['name'] and v.name == variant['value']
+                        )
+                        if not variant_match:
+                            all_variants_match = False
+                            break
+
+                    if all_variants_match:
+                        producto_variante = producto
+                        break 
+            else:
+                producto_variante = productos
+            if not producto_variante:
+                return {'error': _(f"The product {product['productSku']} was not found with the defined variants. Check the variant, SKU and try again.")}
+            
+            if not 'batchNumber' in product or product['batchNumber'] == '':
+                lote = False
+            else:
+                lote = self.env['stock.lot'].sudo().search([('name', '=', product['batchNumber']), ('product_id.id', '=', producto_variante.id), ('company_id.id', '=', context.company_id.id)])
+                if not lote:
+                    lote = False
+            product_list.append({
+                'product_id': producto_variante,
+                'lot_id': lote,
+                'quantity': product['quantity'],
+                'missing_quantity': product['missingQuantity']
+            })
+        for product in product_list:
+            move_line = False
+            move_context = context.move_ids.filtered(lambda m: m.product_id.id == product['product_id'].id)
+            if move_context:
+                move_context.product_uom_qty = product['quantity']
+            if move_context and product['lot_id']:
+                move_line = context.move_line_ids.filtered(lambda ml: ml.move_id.id == move_context.id and ml.lot_id.id == product['lot_id'].id)
+            if not move_line:
+                move_line = context.move_line_ids.filtered(lambda ml: ml.move_id.id == move_context.id and not ml.lot_id)
+            if move_line:
+                move_line.quantity = product['quantity'] - product['missing_quantity']
+            else:
+                return {'error': _(f"Product {product['product_id'].name} not found in the operation. Check the product and try again.")}
+        
+        body_mensaje = Markup(
+            _(f'''
+            <h2>¡Se reportaron productos faltantes en la recepción!</h2>
+            <p>Valide con Planta las discrepancias. Si desea recibir el pedido con dichos faltantes, presione "Validar".</p>
+            <ul>
+                <li>Operación: {context.name}</li>
+                <li><strong>Productos:</strong>
+                    <ul>
+                        {''.join([f"<li>Producto: {product['product_id'].display_name}, Cantidad esperada: {product['quantity']} Unidades, Cantidad faltante: {product['missing_quantity']} Unidades.</li>" for product in product_list])}
+                    </ul>
+                </li>
+            </ul>
+            '''
+        ))
+        context.message_post(body=body_mensaje, message_type='notification')
+        context.rfid_response = "MISSING_PRODUCTS"
+        return {
+            'success': _(f'Missing Products reported in operation {context.name}!'),
+        }
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
