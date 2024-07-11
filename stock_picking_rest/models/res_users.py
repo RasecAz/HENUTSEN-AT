@@ -1,4 +1,4 @@
-from odoo import _, api, fields, models
+from odoo import _, fields, models
 
 class ResUsers (models.Model):
     _inherit = 'res.users'
@@ -9,6 +9,6 @@ class ResUsers (models.Model):
 
     # INFO: Campo para indicar si el usuario está autorizado a aprobar ordenes de venta a terceros
     is_approve_user = fields.Boolean(
-        string = '¿Autorizado a aprobar ordenes de venta a terceros?',
+        string = '¿Is Pursache approver user?',
         default = False,
     )

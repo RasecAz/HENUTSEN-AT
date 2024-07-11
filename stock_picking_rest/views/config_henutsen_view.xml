@@ -9,18 +9,18 @@
             <form>
                 <header>
                     <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
-                    <button string='Guardar' name="save_data" type="object" class="btn-primary" invisible="state == 'done'"/>
-                    <button string='Actualizar Bearer' name="get_bearer" type="object" class="btn-primary"/>
-                    <button string='Actualizar Bearer QA' name="get_bearer_qa" type="object" class="btn" />
-                    <button string='Modificar Info' name="modify_config" type="object" class="btn" invisible="state == 'draft'"/>
+                    <button string='Save' name="save_data" type="object" class="btn-primary" invisible="state == 'done'"/>
+                    <button string='Refresh Bearer' name="get_bearer" type="object" class="btn-primary"/>
+                    <button string='Refresh Bearer QA' name="get_bearer_qa" type="object" class="btn" />
+                    <button string='Modify Settings' name="modify_config" type="object" class="btn" invisible="state == 'draft'"/>
                 </header>
                 <sheet>
-                    <widget name="web_ribbon" title="Guardado" bg_color="text-bg-info" invisible="state == 'draft'"/>
+                    <widget name="web_ribbon" title="Saved" bg_color="text-bg-info" invisible="state == 'draft'"/>
                     <div class="oe_title" colspan="4">
-                        <h1>Configuración de parámetros Webservice Henutsen</h1>
+                        <h1>Webservices and other config params</h1>
                     </div>
                     <notebook>
-                        <page name="production" string="Producción">
+                        <page name="production" string="Production">
                             <group>
                                 <field name="last_update" />
                                 <field name="url_bearer" readonly="state == 'done'" />
@@ -60,7 +60,7 @@
     
     <!-- ACTION -->
     <record id="action_config_henutsen" model="ir.actions.act_window">
-        <field name="name">Ajustes Henutsen</field>
+        <field name="name">Settings Aristextil</field>
         <field name="res_model">config.henutsen</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="config_henutsen_form_view"/>
@@ -70,11 +70,9 @@
     <!-- MENÚ -->
     <menuitem 
         id="config_henutsen_menu" 
-        name="Ajustes Henutsen" 
+        name="Settings Aristextil" 
         parent="stock.menu_stock_config_settings" 
         action="action_config_henutsen"
         sequence="-1"/>
-
-
 
 </odoo>
