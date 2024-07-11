@@ -1,6 +1,9 @@
 from odoo import _, api, fields, models
 import json, requests
 import os
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class ProductAttribute(models.Model):
     _inherit = 'product.attribute'
@@ -32,9 +35,11 @@ class ProductAttribute(models.Model):
             }
             response = requests.post(service_url, headers=headers, data=json_henutsen)
             if response.status_code == 200:
-                print(response.text)
+                _logger.info(_('Variants sent successfully'))
+            else:
+                _logger.warning(_(f'Error sending variants to Henutsen: {response.text}'))
         else:
-            print(response.text)
+            _logger.info(_('Variants sent successfully'))
     
     def get_config_params(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
