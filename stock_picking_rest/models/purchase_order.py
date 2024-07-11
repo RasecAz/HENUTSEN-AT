@@ -65,6 +65,8 @@ class PurchaseOrderLine(models.Model):
             else:
                 price_in_pricelist = line.env['product.pricelist.item'].search([('pricelist_id', '=', pricelist.id),('product_id', '=', product.id)], limit=1).fixed_price
             if not price_in_pricelist:
+                price_in_pricelist = line.env['product.pricelist.item'].search([('pricelist_id', '=', pricelist.id),('product_tmpl_id', '=', product.product_tmpl_id.id)], limit=1).fixed_price
+            if not price_in_pricelist:
                 price_in_pricelist = 0
             line.price_in_pricelist = price_in_pricelist
             main_company = line.company_id.parent_id.id
