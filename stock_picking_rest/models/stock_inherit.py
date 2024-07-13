@@ -287,25 +287,15 @@ class StockInherit(models.Model):
             product_list = []
             for product in box_list.quant_ids:
                 referencia_producto = product.product_id.default_code
-                name_producto = product.product_id.name.rstrip()
                 cantidad_producto = product.quantity
                 variant_list = []
-                producto_lista = product.product_id.default_code
-                if product.product_id.product_tmpl_id.attribute_line_ids:
-                    for variant in product.product_id.product_tmpl_id.attribute_line_ids:
-                        tipo_variante = variant.attribute_id.name
-                        atributo_variante = ""
-                        refe = product.product_id.display_name
-                        attribute_values_string = refe.split("(")[1].split(")")[0]
-                        attribute_values = attribute_values_string.split(", ")
-                        #Se recorren los valores de las variantes y se comparan con los valores de la lista de variantes
-                        for lista in attribute_values:
-                            for value in variant.value_ids:
-                                if value.name in lista:
-                                    atributo_variante = value.name
+                if product.product_id.product_template_attribute_value_ids:
+                    for variant in product.product_id.product_template_attribute_value_ids:
+                        nombre_variante = variant.attribute_id.name
+                        valor_variante = variant.name
                         variant_list.append({
-                            "name": tipo_variante,
-                            "value": atributo_variante
+                            "name": nombre_variante,
+                            "value": valor_variante
                         })
                     product_list.append({
                     "quantity": cantidad_producto,
