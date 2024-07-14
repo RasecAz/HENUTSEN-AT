@@ -27,6 +27,7 @@
     # always loaded
     'data': [
         'security/ir.model.access.csv',
+        'views/res_config_settings_view.xml',
         'views/stock_inherit_view.xml',
         'views/stock_quant_package_view.xml',
         'views/config_henutsen_view.xml',

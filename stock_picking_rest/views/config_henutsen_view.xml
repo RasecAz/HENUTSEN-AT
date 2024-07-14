@@ -70,9 +70,16 @@
     <!-- MENÚ -->
     <menuitem 
         id="config_henutsen_menu" 
-        name="Settings Aristextil" 
-        parent="stock.menu_stock_config_settings" 
+        name="Henutsen RFID" 
+        parent="base.menu_custom" 
         action="action_config_henutsen"
-        sequence="-1"/>
+        sequence="1"/>
+    
+    <menuitem
+        id="config_api_menu"
+        name="API Settings"
+        action="action_config_henutsen"
+        parent="config_henutsen_menu"
+        sequence="10"/>
 
 </odoo>
