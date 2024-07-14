@@ -46,6 +46,10 @@ class StockInherit(models.Model):
         default=False,
         compute='_compute_send_button_visible',
     )
+    packing_button_visible = fields.Boolean(
+        default=False,
+        compute='_compute_send_button_visible',
+    )
     endpoint = fields.Text(
         string='Endpoint',
         readonly=True
@@ -249,8 +253,7 @@ class StockInherit(models.Model):
 
         if response.status_code == 200:
             # La solicitud fue exitosa, procesa la respuesta (json_response)
-            # TRAD: <h2>¡Generación de códigos RFID en Henutsen exitosa!</h2> <p>Se ha enviado la información a Henutsen, inicie el proceso de etiquetado.</p>
-            body_mensaje = Markup(f'<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information has been sent to Henutsen, start the labeling process.</p>')
+            body_mensaje = Markup(_(f'<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information has been sent to Henutsen, start the labeling process.</p>'))
             self.message_post(body=body_mensaje, message_type='notification')
             self.rfid_response = "SUCCESS"
             self.response = response.text
@@ -264,8 +267,7 @@ class StockInherit(models.Model):
             response = requests.request("POST",service_url, headers=headers, data=data_json)
 
             if response.status_code == 200:
-                # TRAD: <h2>¡Generación de códigos RFID en Henutsen exitosa!</h2> <p>Se ha enviado la información a Henutsen, inicie el proceso de etiquetado.</p>
-                body_mensaje = Markup(f'<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information has been sent to Henutsen, start the labeling process.</p>')
+                body_mensaje = Markup(_(f'<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information has been sent to Henutsen, start the labeling process.</p>'))
                 self.message_post(body=body_mensaje, message_type='notification')
                 self.rfid_response = "SUCCESS"
                 self.response = response.text
@@ -275,7 +277,92 @@ class StockInherit(models.Model):
     
     # INFO: Método que envía la información de picking a la URL expuesta de Henutsen
     def send_picking_to_henutsen(self):
-        self._picking_service()    
+        self._picking_service()  
+
+    # INFO: Método que envía la información de packing a la URL expuesta de Henutsen
+    def send_packing_to_henutsen(self):
+        operation_name = self.name
+        operacion_origen = self.location_id.company_id.name
+        operacion_destino = self.partner_id.name
+        box_order = []
+        data_json_packing = {}
+        for box_list in self.move_line_ids_without_package.mapped('result_package_id'):
+            box_id = box_list.name
+            product_list = []
+            for product in box_list.quant_ids:
+                referencia_producto = product.product_id.default_code
+                cantidad_producto = product.quantity
+                variant_list = []
+                if product.product_id.product_template_attribute_value_ids:
+                    for variant in product.product_id.product_template_attribute_value_ids:
+                        nombre_variante = variant.attribute_id.name
+                        valor_variante = variant.name
+                        variant_list.append({
+                            "name": nombre_variante,
+                            "value": valor_variante
+                        })
+                    product_list.append({
+                    "quantity": cantidad_producto,
+                    "productSku": referencia_producto,
+                    "variantList": variant_list
+                    })
+                #Si no existen variantes, no se incluye sección de variantList al json
+                else:
+                    product_list.append({
+                    "quantity": cantidad_producto,
+                    "productSku": referencia_producto
+                })
+            box_order.append({
+                "id": box_id,
+                "productList": product_list
+            })
+        
+        data_json_packing = json.dumps({
+            "consecutive": operation_name,
+            "sourceLocation": operacion_origen,
+            "targetLocation": operacion_destino,
+            "boxOrders": box_order
+        })
+        # IMPORTANTE: Todo debe estar configurado en la vista de configuración de Henutsen para que el web service funcione correctamente. El programa es capaz de reconfigurarse si el token expira.
+        self.json_generado = data_json_packing
+        config = self.get_config_params()
+        bearer_token = config['bearer_token']
+        service_url = config['url_packing']
+        self.endpoint = service_url
+        
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + bearer_token
+            }
+
+        # Preparación de la solicitud POST con el token
+        response = requests.request("POST",service_url, headers=headers, data=data_json_packing)
+
+        if response.status_code == 200:
+            # La solicitud fue exitosa, procesa la respuesta (json_response)
+            success_message = _(f'<h2>¡Operation successfull!</h2> <p>Data has been send to Henutsen.</p>')
+            body_mensaje = Markup(success_message)
+            self.message_post(body=body_mensaje, message_type='notification')
+            self.rfid_response = "SUCCESS"
+            self.response = response.text
+        else:
+            # La solicitud falló, maneja el error
+            bearer_token = self.get_bearer()
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + bearer_token
+            }
+            # Preparación de la solicitud POST con el token
+            response = requests.request("POST",service_url, headers=headers, data=data_json_packing)
+            if response.status_code == 200:
+                success_message = _(f'<h2>¡Operation successfull!</h2> <p>Data has been send to Henutsen.</p>')
+                body_mensaje = Markup(success_message)
+                self.message_post(body=body_mensaje, message_type='notification')
+                self.rfid_response = "SUCCESS"
+                self.response = response.text
+            else:
+                self.rfid_response = "FAILED. Error " + str(response.status_code)
+                self.response = response.text  
         
     # INFO: Método que define si los botónes de envío a Henutsen y CG1 son visibles o no
     #  Picking es visible si:
@@ -299,6 +386,7 @@ class StockInherit(models.Model):
             es_packing = False
             es_salida = False
             proceso_completado = False
+            is_send_mode = self.env['res.config.settings'].sudo().get_values().get('send_packing_to_henutsen')
             for sucursal in record.location_dest_id.company_id.child_ids:
                 sucursales = sucursal.name
                 if sucursales == record.partner_id.name:
@@ -312,6 +400,7 @@ class StockInherit(models.Model):
                 es_salida = True
 
             record.send_button_visible = es_picking and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS"
+            record.packing_button_visible = es_packing and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS" and is_send_mode
             record.cg1_button_visible = es_salida and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS"
 
     # INFO: Método que calcula la cantidad total de productos en la orden de salida (Para el vale de entrega) 
@@ -374,6 +463,9 @@ class StockInherit(models.Model):
         context = self.env['stock.picking'].sudo().search([('name', '=', data['consecutive'])], limit=1)
         if not context:
             return {'error': _(f'No Packing operation {data["consecutive"]} found. Check the operation number and try again.')}
+        is_recieve_mode = self.env['res.config.settings'].sudo().get_values().get('recieve_packing_from_henutsen')
+        if not is_recieve_mode:
+            return {'error': _('Aristextil instance is not configured to receive packing from Henutsen.')}
         if context.state == 'done':
             return {'error': _(f'The operation {context.name} has already been validated. It is not possible to perform the packing.')}
         boxes_list = []
@@ -416,7 +508,7 @@ class StockInherit(models.Model):
                 })
             boxes_list.append({
                 'id': box_order['id'],
-                'weight': box_order['weight'],
+                'weight': box_order['weight'] if 'weight' in box_order else 0.0,
                 'product_list': product_list
             })
         try:
@@ -424,7 +516,7 @@ class StockInherit(models.Model):
                 move.move_line_ids.sudo().unlink()
             for box in boxes_list:
                 try:
-                    weight = float(box['weight']) if box['weight'] else 0.0
+                    weight = float(box['weight'])
                 except ValueError:
                     weight = 0.0
                 box_id = context.env['stock.quant.package'].sudo().create({'name': box['id'],'package_weight': weight})
