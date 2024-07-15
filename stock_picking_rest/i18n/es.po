@@ -502,6 +502,11 @@ msgid "Sent to Henutsen"
 msgstr "Enviado a Henutsen"
 
 #. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Service Failed"
+msgstr "Envío Fallido"
+
+#. module: stock_picking_rest
 #: model:ir.actions.act_window,name:stock_picking_rest.action_config_henutsen
 msgid "Settings Aristextil"
 msgstr "Ajustes Aristextil"

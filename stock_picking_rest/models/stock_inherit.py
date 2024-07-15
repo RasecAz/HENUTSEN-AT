@@ -272,7 +272,9 @@ class StockInherit(models.Model):
                 self.rfid_response = "SUCCESS"
                 self.response = response.text
             else:
-                self.rfid_response = "FAILED. Error " + str(response.status_code)
+                self.rfid_response = "FAILED"
+                body_mensaje = Markup(f'<h2>¡Envío Errado!</h2> <p>Hubo un error al enviar la información a Henutsen. Detalles {response.text}.</p><br><p>Valide los parámetros del envío e intente de nuevo.</p>')
+                self.message_post(body=body_mensaje, message_type='notification')
                 self.response = response.text
     
     # INFO: Método que envía la información de picking a la URL expuesta de Henutsen
@@ -355,13 +357,14 @@ class StockInherit(models.Model):
             # Preparación de la solicitud POST con el token
             response = requests.request("POST",service_url, headers=headers, data=data_json_packing)
             if response.status_code == 200:
-                success_message = _(f'<h2>¡Operation successfull!</h2> <p>Data has been send to Henutsen.</p>')
-                body_mensaje = Markup(success_message)
+                body_mensaje = Markup(_(f'<h2>¡Operación Exitosa!</h2> <p>La información ha sido enviada a Henutsen.</p>'))
                 self.message_post(body=body_mensaje, message_type='notification')
                 self.rfid_response = "SUCCESS"
                 self.response = response.text
             else:
-                self.rfid_response = "FAILED. Error " + str(response.status_code)
+                self.rfid_response = "FAILED"
+                body_mensaje = Markup(f'<h2>¡Envío Errado!</h2> <p>Hubo un error al enviar la información a Henutsen. Detalles {response.text}.</p><br><p>Valide los parámetros del envío e intente de nuevo.</p>')
+                self.message_post(body=body_mensaje, message_type='notification')
                 self.response = response.text  
         
     # INFO: Método que define si los botónes de envío a Henutsen y CG1 son visibles o no

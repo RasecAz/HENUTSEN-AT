@@ -17,6 +17,8 @@
                 <widget name="web_ribbon" title="Sent to CG1" bg_color="text-bg-info" invisible="not ribbon_visible"/>
                 <widget name="web_ribbon" title="Wrong Sending" bg_color="text-bg-danger" invisible="not ribbon_error"/>
                 <widget name="web_ribbon" title="Missing reported" bg_color="text-bg-danger" invisible="rfid_response != 'MISSING_PRODUCTS'"/>
+                <widget name="web_ribbon" title="Service Failed" bg_color="text-bg-danger" invisible="rfid_response != 'FAILED'"/>
+
             </xpath>
             <xpath expr='//notebook' position="inside">
                 <page name="conectionpage" string="Henutsen Connection" groups="base.group_no_one">
