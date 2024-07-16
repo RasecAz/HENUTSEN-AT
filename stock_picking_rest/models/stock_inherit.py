@@ -316,11 +316,13 @@ class StockInherit(models.Model):
                 })
             box_order.append({
                 "id": box_id,
+                "weight": box_list.package_weight,
                 "productList": product_list
             })
         
         data_json_packing = json.dumps({
             "consecutive": operation_name,
+            "saleOrder": self.origin,
             "sourceLocation": operacion_origen,
             "targetLocation": operacion_destino,
             "boxOrders": box_order
