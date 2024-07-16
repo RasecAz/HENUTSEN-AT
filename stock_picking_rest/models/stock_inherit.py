@@ -316,7 +316,7 @@ class StockInherit(models.Model):
                 })
             box_order.append({
                 "id": box_id,
-                "weight": box_list.package_weight,
+                "weight": str(box_list.package_weight),
                 "productList": product_list
             })
         
