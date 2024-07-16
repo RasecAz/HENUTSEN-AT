@@ -9,6 +9,6 @@ class StockQuantPackage(models.Model):
 
     # INFO: Campo para indicar el peso total de la caja (Para el vale de entrega)
     package_weight = fields.Float(
-        string='Peso total (Kg)',
-        help='Ingrese el peso en kilogramos de la caja, posterior al embalaje de los productos',
+        string='Total weight (Kg)',
+        help='Insert the weight in kilograms of the box, after packaging the products',
     )

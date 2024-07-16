@@ -1,0 +1,672 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* stock_picking_rest
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-07-15 14:17+0000\n"
+"PO-Revision-Date: 2024-07-15 09:27-0500\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es_CO\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.4.4\n"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#, python-format
+msgid ""
+"<h2>CG1 Shipment Successful!</h2> <p>The information has been sent to CG1, "
+"check the information in the system.</p>"
+msgstr ""
+"<h2>Envío a CG1 Exitoso!</h2> <p>La información ha sido enviada a CG1, "
+"revise la información en el sistema.</p>"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#, python-format
+msgid ""
+"<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information "
+"has been sent to Henutsen, start the labeling process.</p>"
+msgstr ""
+"<h2>¡Generación de códigos RFID exitosa!</h2> <p>La información se ha "
+"enviado a Henutsen, inicie el proceso de etiquetado.</p>"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_report_delivery_package_section_line_inherit
+msgid "<span>Kg</span>"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.report_delivery_document_inherit
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_move_table_inherit
+msgid "<span>Total Products</span>"
+msgstr "<span>Productos Totales</span>"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.report_delivery_document_inherit
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_move_table_inherit
+msgid "<span>Units</span>"
+msgstr "<span>Unidades</span>"
+
+#. module: stock_picking_rest
+#: model:ir.ui.menu,name:stock_picking_rest.config_api_menu
+msgid "API Settings"
+msgstr "Parámetros"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__api_key
+msgid "Api Key"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__api_key_qa
+msgid "Api user Key QA"
+msgstr "Api Key Usuario QA"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__api_key
+msgid "Api user key"
+msgstr "Api Key Usuario"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__bearer_token
+msgid "Bearer Token"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__bearer_token_qa
+msgid "Bearer Token QA"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__bearer
+msgid "Bearer token"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_sale_order__button_approve_invisible
+msgid "Button Approve Invisible"
+msgstr "Visibilidad botón aprobar"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_sale_order__button_confirm_invisible
+msgid "Button Confirm Invisible"
+msgstr "Visibilidad botón confirmar"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__cg1_button_visible
+msgid "Cg1 Button Visible"
+msgstr "Visibilidad botón CG1"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_config_henutsen
+msgid "Config Henutsen"
+msgstr "Ajustes Aristextil"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_res_config_settings
+msgid "Config Settings"
+msgstr "Ajustes de configuración"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.view_sale_order_form_inherit
+msgid "Confirm"
+msgstr "Confirmar"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__create_date
+msgid "Created on"
+msgstr "Creado"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__display_name
+msgid "Display Name"
+msgstr "Nombre"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields.selection,name:stock_picking_rest.selection__config_henutsen__state__done
+msgid "Done"
+msgstr "Guardado"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields.selection,name:stock_picking_rest.selection__config_henutsen__state__draft
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__email_henutsen
+msgid "Email Henutsen"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__email_henutsen_qa
+msgid "Email QA Henutsen"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__endpoint
+msgid "Endpoint"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,help:stock_picking_rest.field_config_henutsen__special_branch
+msgid ""
+"Enter the identification numbers of the special stores, stores registered "
+"as branches in Odoo, but that for CG1 are third parties. NOTE: Enter the id "
+"as it is registered in the contact (consider the verification digit) "
+"separated by comma(,), without spaces. Example: 123-1,231,321-0,432,543"
+msgstr ""
+"Ingrese los números de identificación de las tiendas especiales, tiendas "
+"registradas como Sucursales en Odoo, pero que para CG1 son terceros. NOTA: "
+"Ingrese el identificador como está registrado en el contacto (Tenga en "
+"cuenta el dígito de verificación) separado por coma (,), sin espacios. "
+"Ejemplo: 123-1,231,321-0,432,543"
+
+#. module: stock_picking_rest
+#: model:ir.actions.server,name:stock_picking_rest.cron_send_variants_to_henutsen_ir_actions_server
+msgid "Enviar variantes a Henutsen"
+msgstr ""
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#, python-format
+msgid "FAILED. Error decoding the response."
+msgstr "FAILED. Error en la codificación del response."
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#, python-format
+msgid "FAILED. Error in the response request."
+msgstr "FAILED. Error en la respuesta del servicio."
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#, python-format
+msgid "FAILED. Unknown error in the response request."
+msgstr "FAILED. Error desconocido en la respuesta del servicio."
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Generate RFID codes in Henutsen"
+msgstr "Generar códigos en Henutsen"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__json_generado
+msgid "Generated JSON"
+msgstr "JSON Generado"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Henutsen Connection"
+msgstr "Conexión Henutsen"
+
+#. module: stock_picking_rest
+#: model:ir.ui.menu,name:stock_picking_rest.config_henutsen_menu
+msgid "Henutsen RFID"
+msgstr "Ajustes Aristextil"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__id
+msgid "ID"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_quant__id_ajuste
+msgid "ID Adjustment"
+msgstr "ID Ajuste"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,help:stock_picking_rest.field_res_config_settings__recieve_packing_from_henutsen
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.res_config_inherit_stock
+msgid "If checked, the system will be able to recieve packing from Henutsen"
+msgstr "El sistema estará habilitado para recibir el packing desde Henutsen"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,help:stock_picking_rest.field_res_config_settings__send_packing_to_henutsen
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.res_config_inherit_stock
+msgid "If checked, the system will be able to send packing to Henutsen"
+msgstr "El sistema estará habilitado para enviar el packing a Henutsen"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,help:stock_picking_rest.field_stock_quant_package__package_weight
+msgid ""
+"Insert the weight in kilograms of the box, after packaging the products"
+msgstr ""
+"Inserte el peso total de la caja en kilogramos, después de llevar a cabo el "
+"empaquetado de productos"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__is_executed
+msgid "Is executed"
+msgstr "Fue ejecutado"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__is_production
+msgid "Is production"
+msgstr "Es producción"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__write_uid
+msgid "Last Updated by"
+msgstr "Última modificación por"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__write_date
+msgid "Last Updated on"
+msgstr "Ultima modificación"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__last_update
+msgid "Last update"
+msgstr "Última modificación"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/ajuste_henutsen.py:0
+#, python-format
+msgid "Location not found, validate the location name"
+msgstr "Ubicación no encontrada, valide el nombre de la ubicación"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/product_template.py:0
+#, python-format
+msgid ""
+"Missing data in Henutsen configuration, validate that all fields are "
+"complete, if you do not have access, ask an administrator to update this "
+"information"
+msgstr ""
+"Información faltante en la configuración de endpoints, valide que todos los "
+"campos estén diligenciados. Si no tiene acceso, solicítele a un "
+"administrador la actualización de información"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/config_henutsen.py:0
+#, python-format
+msgid "Missing data to get the QA token"
+msgstr "Información faltante para generar el Bearer Token QA"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/config_henutsen.py:0
+#, python-format
+msgid "Missing data to get the token"
+msgstr "Información faltante para generar el Bearer Token"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/config_henutsen.py:0
+#, python-format
+msgid "Missing data to save the configuration"
+msgstr "Faltan campos para guardar la configuración"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Missing reported"
+msgstr "Faltantes reportados"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
+msgid "Modify Settings"
+msgstr "Modificar Info"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_product__name_rtrim
+msgid "Name Rtrim"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_stock_quant_package
+msgid "Packages"
+msgstr "Paquetes"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Packed"
+msgstr "Empacado"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__packing_button_visible
+msgid "Packing Button Visible"
+msgstr "Botón de embalaje visible"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields.selection,name:stock_picking_rest.selection__sale_order__state__pending
+msgid "Pending Approval"
+msgstr "Aprobación pendiente"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order_line__price_in_pricelist
+msgid "Price in pricelist"
+msgstr "Precio en lista"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_product_template
+msgid "Product"
+msgstr "Producto"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_product_attribute
+msgid "Product Attribute"
+msgstr "Atributo del Producto"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_product_product
+msgid "Product Variant"
+msgstr "Variantes de producto"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/ajuste_henutsen.py:0
+#, python-format
+msgid "Product not found, check de SKU code: nameProd"
+msgstr "Producto no encontrado, revise el SKU: nameProd"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
+msgid "Production"
+msgstr "Producción"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_purchase_order
+msgid "Purchase Order"
+msgstr "Orden de Compra"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_purchase_order_line
+msgid "Purchase Order Line"
+msgstr "Línea de Orden de Compra"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_stock_quant
+msgid "Quants"
+msgstr "Cants"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.res_config_inherit_stock
+msgid "RFID"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_res_config_settings__recieve_packing_from_henutsen
+msgid "Recieve Packing From Henutsen"
+msgstr "Recibir Packing desde Henutsen"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
+msgid "Refresh Bearer"
+msgstr "Refrescar Bearer"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
+msgid "Refresh Bearer QA"
+msgstr "Refrescar Bearer QA"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__response
+msgid "Request response"
+msgstr "Respuesta request"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__rfid_response
+msgid "Request state"
+msgstr "Estado Request"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__ribbon_error
+msgid "Ribbon error"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__ribbon_visible
+msgid "Ribbon visible"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_sale_order
+msgid "Sales Order"
+msgstr "Orden de Venta"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
+msgid "Save"
+msgstr "Guardar"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
+msgid "Saved"
+msgstr "Guardado"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__send_button_visible
+msgid "Send Button Visible"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_res_config_settings__send_packing_to_henutsen
+msgid "Send Packing To Henutsen"
+msgstr "Enviar Packing a Henutsen"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.view_sale_order_form_inherit
+msgid "Send to Approval"
+msgstr "Enviar a Aprobación"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Send to CG1"
+msgstr "Enviar a CG1"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Send to RFID Verification"
+msgstr "Enviar a verificación RFID"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Sent to CG1"
+msgstr "Enviado a CG1"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Sent to Henutsen"
+msgstr "Enviado a Henutsen"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Service Failed"
+msgstr "Envío Fallido"
+
+#. module: stock_picking_rest
+#: model:ir.actions.act_window,name:stock_picking_rest.action_config_henutsen
+msgid "Settings Aristextil"
+msgstr "Ajustes Aristextil"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__special_branch
+msgid "Special branches"
+msgstr "Sucursales especiales"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__special_branch_qa
+msgid "Special branches QA"
+msgstr "Sucursales especiales QA"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__state
+msgid "State"
+msgstr "Estado"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_sale_order__state
+msgid "Status"
+msgstr "Estado"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_stock_move
+msgid "Stock Move"
+msgstr "Movimiento de Existencias"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order_line__stock_state
+msgid "Stock State"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order_line__stock_in_warehouse
+msgid "Stock in warehouse"
+msgstr "Stock en Planta"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
+msgid "Test"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order_line__total_inline
+msgid "Total in line"
+msgstr "Total en línea"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__total_order
+msgid "Total products"
+msgstr "Productos Totales"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_quant_package__package_weight
+msgid "Total weight (Kg)"
+msgstr "Peso total (Kg)"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_stock_picking
+msgid "Transfer"
+msgstr "Transferir"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_bearer
+msgid "Url Bearer Token"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_bearer_qa
+msgid "Url Bearer Token QA"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_cg1
+msgid "Url CG1"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_cg1_qa
+msgid "Url CG1 QA"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_packing
+msgid "Url Packing"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_packing_qa
+msgid "Url Packing QA"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_picking
+msgid "Url Picking"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_picking_qa
+msgid "Url Picking QA"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_product
+msgid "Url Product"
+msgstr "Url Productos"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_product_qa
+msgid "Url Product QA"
+msgstr "Url Productos QA"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_variants
+msgid "Url Variants"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_variants_qa
+msgid "Url Variants QA"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_adjustment
+msgid "Url inventories adjustment"
+msgstr "URL Ajuste de inventarios"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_adjustment_qa
+msgid "Url inventories adjustment QA"
+msgstr "URL Ajuste de inventarios QA"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_res_users
+msgid "User"
+msgstr "Usuario"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/product_attribute.py:0
+#, python-format
+msgid "Variants sent successfully"
+msgstr "Variantes enviadas a Henutsen Exitosamente"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
+msgid "Webservices and other config params"
+msgstr "Parámetros de Configuración Aristextil"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Wrong Sending"
+msgstr "Envío Errado"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields.selection,name:stock_picking_rest.selection__purchase_order_line__stock_state__available
+msgid "avaliable"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields.selection,name:stock_picking_rest.selection__purchase_order_line__stock_state__in_zero
+msgid "in zero"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields.selection,name:stock_picking_rest.selection__purchase_order_line__stock_state__not_available
+msgid "not avaliable"
+msgstr ""
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_res_users__is_approve_user
+msgid "¿Is Pursache approver user?"
+msgstr "¿Usuario autorizado para aprobar ordenes de venta?"

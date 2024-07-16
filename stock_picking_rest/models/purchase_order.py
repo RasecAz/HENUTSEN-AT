@@ -29,12 +29,12 @@ class PurchaseOrderLine(models.Model):
 # --------------------------------------------------------------------------------
 
     price_in_pricelist = fields.Monetary(
-        string = "Precio en lista",
+        string = "Price in pricelist",
         compute='_compute_price_in_pricelist'
     )
 
     stock_in_warehouse = fields.Float(
-        string = "Stock en planta",
+        string = "Stock in warehouse",
         compute='_compute_price_in_pricelist'
     )
     total_inline = fields.Monetary(
@@ -43,9 +43,9 @@ class PurchaseOrderLine(models.Model):
     )
     stock_state = fields.Selection(
         selection = [
-            ('available', 'Disponible'),
-            ('not_available', 'No disponible'),
-            ('in_zero', 'En cero')
+            ('available', 'avaliable'),
+            ('not_available', 'not avaliable'),
+            ('in_zero', 'in zero')
         ],
         default = 'available',
     )
