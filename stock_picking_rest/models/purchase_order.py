@@ -83,9 +83,10 @@ class PurchaseOrderLine(models.Model):
         selection = [
             ('available', 'avaliable'),
             ('not_available', 'not avaliable'),
-            ('in_zero', 'in zero')
+            ('in_zero', 'in zero'),
+            ('not_calculated', 'not calculated'),
         ],
-        default = 'available',
+        default = 'not_calculated',
     )
 # --------------------------------------------------------------------------------
 # METODOS
@@ -96,11 +97,11 @@ class PurchaseOrderLine(models.Model):
         pricelist = line.order_id.company_id.partner_id.property_product_pricelist
         product = line.product_id
         if not product.attribute_line_ids:
-            price_in_pricelist = line.env['product.pricelist.item'].search([('pricelist_id', '=', pricelist.id),('product_tmpl_id', '=', product.product_tmpl_id.id)], limit=1).fixed_price
+            price_in_pricelist = line.env['product.pricelist.item'].sudo().search([('pricelist_id', '=', pricelist.id),('product_tmpl_id', '=', product.product_tmpl_id.id)], limit=1).fixed_price
         else:
-            price_in_pricelist = line.env['product.pricelist.item'].search([('pricelist_id', '=', pricelist.id),('product_id', '=', product.id)], limit=1).fixed_price
+            price_in_pricelist = line.env['product.pricelist.item'].sudo().search([('pricelist_id', '=', pricelist.id),('product_id', '=', product.id)], limit=1).fixed_price
         if not price_in_pricelist:
-            price_in_pricelist = line.env['product.pricelist.item'].search([('pricelist_id', '=', pricelist.id),('product_tmpl_id', '=', product.product_tmpl_id.id)], limit=1).fixed_price
+            price_in_pricelist = line.env['product.pricelist.item'].sudo().search([('pricelist_id', '=', pricelist.id),('product_tmpl_id', '=', product.product_tmpl_id.id)], limit=1).fixed_price
         if not price_in_pricelist:
             price_in_pricelist = 0
         line.price_in_pricelist = price_in_pricelist
@@ -109,7 +110,7 @@ class PurchaseOrderLine(models.Model):
         line = self
         product = line.product_id
         if location:
-            location_ids = location.child_internal_location_ids.ids
+            location_ids = location.sudo().child_internal_location_ids.ids
             stock_data = self.env['stock.quant'].sudo().read_group(
                 [('location_id', 'in', location_ids), ('product_id', '=', product.id)],
                 ['product_id', 'quantity'],
