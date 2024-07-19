@@ -52,7 +52,7 @@ class PurchaseOrder(models.Model):
     def _compute_update_buttons_visibility(self):
         for order in self:
             order.update_buttons_visibility = False
-            if order.state in ['draft', 'sent'] and order.partner_id and order.order_line:
+            if order.partner_id and order.order_line:
                 order.update_buttons_visibility = True
 
 class PurchaseOrderLine(models.Model):
