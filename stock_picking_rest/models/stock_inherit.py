@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 from odoo import SUPERUSER_ID, _, fields, models, api
 from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
 from markupsafe import Markup
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 from datetime import datetime
 
 class StockInherit(models.Model):
@@ -641,6 +641,33 @@ class StockInherit(models.Model):
         return {
             'success': _(f'Missing Products reported in operation {context.name}!'),
         }
+    
+    def script_recompute_quantities(self):
+        if self.state == 'done':
+            raise UserError(_('La operación ya fue validada, no es posible recomputar las cantidades.'))
+        for move in self.move_ids:
+            if not move.move_orig_ids:
+                move.quantity = move.product_uom_qty
+            else:
+                if len(move.move_orig_ids) > 1:
+                    most_recent_move = max(move.move_orig_ids, key=lambda x: x.create_date)
+                else:
+                    most_recent_move = move.move_orig_ids
+                move.move_line_ids.unlink()
+                for line in most_recent_move.move_line_ids:
+                    self.move_line_ids.create({
+                        'picking_id': move.picking_id.id,
+                        'move_id': move.id,
+                        'product_id': line.product_id.id,
+                        'quantity': line.quantity,
+                        'quantity_product_uom': line.quantity_product_uom,
+                        'product_uom_id': line.product_uom_id.id,
+                        'lot_id': line.lot_id.id if line.lot_id else False,
+                        'location_id': move.location_id.id,
+                        'location_dest_id': move.location_dest_id.id,
+                    })
+
+        return True
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
