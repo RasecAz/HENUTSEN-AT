@@ -40,7 +40,6 @@ class ProductPricelistImport(models.TransientModel):
                     self.env['product.pricelist.item'].create({
                         'pricelist_id': pricelist.id,
                         'product_tmpl_id': product.product_tmpl_id.id,
-                        'product_id': product.id if product else None,
                         'fixed_price': price,
                         'min_quantity': 0,
                     })
