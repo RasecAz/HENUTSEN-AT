@@ -19,4 +19,20 @@
         </field>
     </record>
 
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='show_margins']" position="before">
+                <setting id="mode_easy_import_pricelist"
+                        help="If checked, the system will be enable the easy import pricelist mode" 
+                        company_dependent="1" 
+                        invisible="not group_product_pricelist" >
+                    <field name="easy_import_pricelist" />
+                </setting>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>
