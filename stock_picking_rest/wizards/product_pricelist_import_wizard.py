@@ -29,7 +29,7 @@ class ProductPricelistImport(models.TransientModel):
         sheet = workbook.sheet_by_index(0)
         product_obj = self.env['product.product']
         for row in range(1, sheet.nrows):
-            code = sheet.cell(row, 0).value
+            code = str(int(sheet.cell(row, 0).value) if isinstance(sheet.cell(row, 0).value, float) else sheet.cell(row, 0).value) 
             price = sheet.cell(row, 1).value
             # Buscar todos los productos que coincidan con el código
             products = product_obj.search([('default_code', '=', code)])
