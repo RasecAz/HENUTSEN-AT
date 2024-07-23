@@ -127,6 +127,7 @@ class PurchaseOrderLine(models.Model):
                 stock_quant = 0
 
             line.stock_in_warehouse = stock_quant
+            self.onchange_product_qty()
 
     @api.depends('product_qty', 'price_in_pricelist')
     def _compute_total_inline(self):
