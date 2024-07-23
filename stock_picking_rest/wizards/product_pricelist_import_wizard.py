@@ -2,6 +2,9 @@ from odoo import _, api, fields, models
 import base64
 import xlrd
 from odoo.exceptions import UserError
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class ProductPricelistImport(models.TransientModel):
     _name = 'product.pricelist.import.wizard'
@@ -33,6 +36,8 @@ class ProductPricelistImport(models.TransientModel):
             price = sheet.cell(row, 1).value
             # Buscar todos los productos que coincidan con el código
             products = product_obj.search([('default_code', '=', code)])
+            if not products:
+                _logger.warning(f'No existe el producto {code}, verifique la lista y el producto en Odoo')
             for product in products:
                 # Filtrar los ítems de la lista de precios que correspondan a cada producto
                 items_in_pricelist = pricelist.item_ids.filtered(lambda item: item.product_tmpl_id.id == product.product_tmpl_id.id)

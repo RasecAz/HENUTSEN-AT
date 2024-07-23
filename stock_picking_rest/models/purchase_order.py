@@ -70,10 +70,12 @@ class PurchaseOrderLine(models.Model):
 
     price_in_pricelist = fields.Monetary(
         string = "Price in pricelist",
+        compute = 'compute_price_in_pricelist',
     )
 
     stock_in_warehouse = fields.Float(
         string = "Stock in warehouse",
+        compute = 'compute_stock_lines',
     )
     total_inline = fields.Monetary(
         string = "Total in line",
@@ -92,35 +94,40 @@ class PurchaseOrderLine(models.Model):
 # METODOS
 # --------------------------------------------------------------------------------
     # INFO: Método para calcular el precio en lista del producto (IMPORTANTE: la lista debe estar asociada a la sucursal de la compañía, más no a la compañía en sí)
+    @api.depends('product_id', 'product_qty')
     def compute_price_in_pricelist(self):
-        line = self
-        pricelist = line.order_id.company_id.partner_id.property_product_pricelist
-        product = line.product_id
-        if not product.attribute_line_ids:
-            price_in_pricelist = line.env['product.pricelist.item'].sudo().search([('pricelist_id', '=', pricelist.id),('product_tmpl_id', '=', product.product_tmpl_id.id)], limit=1).fixed_price
-        else:
-            price_in_pricelist = line.env['product.pricelist.item'].sudo().search([('pricelist_id', '=', pricelist.id),('product_id', '=', product.id)], limit=1).fixed_price
-        if not price_in_pricelist:
-            price_in_pricelist = line.env['product.pricelist.item'].sudo().search([('pricelist_id', '=', pricelist.id),('product_tmpl_id', '=', product.product_tmpl_id.id)], limit=1).fixed_price
-        if not price_in_pricelist:
-            price_in_pricelist = 0
-        line.price_in_pricelist = price_in_pricelist
+        for line in self:
+            pricelist = line.order_id.company_id.partner_id.property_product_pricelist
+            product = line.product_id
+            if not product.attribute_line_ids:
+                price_in_pricelist = line.env['product.pricelist.item'].sudo().search([('pricelist_id', '=', pricelist.id),('product_tmpl_id', '=', product.product_tmpl_id.id)], limit=1).fixed_price
+            else:
+                price_in_pricelist = line.env['product.pricelist.item'].sudo().search([('pricelist_id', '=', pricelist.id),('product_id', '=', product.id)], limit=1).fixed_price
+            if not price_in_pricelist:
+                price_in_pricelist = line.env['product.pricelist.item'].sudo().search([('pricelist_id', '=', pricelist.id),('product_tmpl_id', '=', product.product_tmpl_id.id)], limit=1).fixed_price
+            if not price_in_pricelist:
+                price_in_pricelist = 0
+            line.price_in_pricelist = price_in_pricelist
     
-    def compute_stock_lines(self, location):
-        line = self
-        product = line.product_id
-        if location:
-            location_ids = location.sudo().child_internal_location_ids.ids
-            stock_data = self.env['stock.quant'].sudo().read_group(
-                [('location_id', 'in', location_ids), ('product_id', '=', product.id)],
-                ['product_id', 'quantity'],
-                ['product_id']
-            )
-            stock_quant = sum(stock['quantity'] for stock in stock_data) if stock_data else 0
-        else:
-            stock_quant = 0
+    @api.depends('product_id', 'product_qty')
+    def compute_stock_lines(self, location=False):
+        if not location:
+            location = self.order_id.main_location_id if self.order_id.main_location_id else self.order_id.compute_main_location_id()
+        for line in self:
+            product = line.product_id
+            if location:
+                location_ids = location.sudo().child_internal_location_ids.ids
+                stock_data = self.env['stock.quant'].sudo().read_group(
+                    [('location_id', 'in', location_ids), ('product_id', '=', product.id)],
+                    ['product_id', 'quantity'],
+                    ['product_id']
+                )
+                stock_quant = sum(stock['quantity'] for stock in stock_data) if stock_data else 0
+            else:
+                stock_quant = 0
 
-        line.stock_in_warehouse = stock_quant
+            line.stock_in_warehouse = stock_quant
+            self.onchange_product_qty()
 
     @api.depends('product_qty', 'price_in_pricelist')
     def _compute_total_inline(self):
