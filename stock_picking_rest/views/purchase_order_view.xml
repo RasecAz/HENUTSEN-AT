@@ -25,7 +25,7 @@
                 <xpath expr="//sheet/notebook/page/field/tree/field[@name='price_subtotal']" position="replace">
                     <field name="price_subtotal" column_invisible="True"/>
                 </xpath>
-                <xpath expr="//field[@name='currency_id']" position="after">
+                <!-- <xpath expr="//field[@name='currency_id']" position="after">
                     <field name="update_buttons_visibility" invisible="1" />
                     <button name="recompute_price_lines_and_stock" 
                             type="object" 
@@ -35,7 +35,7 @@
                             confirm="This will update the fixed price of all products based on the pricelist of the store and the stock based on partner storage. Be sure to select the correct provider before updating the prices." 
                             invisible="not update_buttons_visibility"
                     />
-                </xpath>
+                </xpath> -->
             </field>
         </record>
     </data>
