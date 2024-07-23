@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-14 04:28+0000\n"
-"PO-Revision-Date: 2024-07-13 23:29-0500\n"
+"POT-Creation-Date: 2024-07-19 22:56+0000\n"
+"PO-Revision-Date: 2024-07-19 17:58-0500\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -22,33 +22,36 @@ msgstr ""
 #: code:addons/stock_picking_rest/models/stock_inherit.py:0
 #, python-format
 msgid ""
-"<h2>CG1 Shipment Successful!</h2> <p>The information has been sent to CG1, "
-"check the information in the system.</p>"
+"<h2>CG1 Shipment Successful!</h2> <p>The information has been sent to CG1, check the information "
+"in the system.</p>"
 msgstr ""
-"<h2>Envío a CG1 Exitoso!</h2> <p>La información ha sido enviada a CG1, "
-"revise la información en el sistema.</p>"
+"<h2>Envío a CG1 Exitoso!</h2> <p>La información ha sido enviada a CG1, revise la información en el "
+"sistema.</p>"
 
 #. module: stock_picking_rest
 #. odoo-python
 #: code:addons/stock_picking_rest/models/stock_inherit.py:0
-#: code:addons/stock_picking_rest/models/stock_inherit.py:0
 #, python-format
-msgid ""
-"<h2>¡Operation successfull!</h2> <p>Data has been send to Henutsen.</p>"
+msgid "<h2>¡Operación Exitosa!</h2> <p>La información ha sido enviada a Henutsen.</p>"
 msgstr ""
-"<h2>¡Operación Exitosa!</h2> <p>La información se ha enviado a Henutsen.</p>"
 
 #. module: stock_picking_rest
 #. odoo-python
 #: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#, python-format
+msgid "<h2>¡Operation successfull!</h2> <p>Data has been send to Henutsen.</p>"
+msgstr "<h2>¡Operación realizada con éxito!</h2> <p>Los datos han sido enviados a Henutsen.</p>"
+
+#. module: stock_picking_rest
+#. odoo-python
 #: code:addons/stock_picking_rest/models/stock_inherit.py:0
 #, python-format
 msgid ""
-"<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information "
-"has been sent to Henutsen, start the labeling process.</p>"
+"<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information has been sent to "
+"Henutsen, start the labeling process.</p>"
 msgstr ""
-"<h2>¡Generación de códigos RFID exitosa!</h2> <p>La información "
-"se ha enviado a Henutsen, inicie el proceso de etiquetado.</p>"
+"<h2>¡Generación de códigos RFID exitosa!</h2> <p>La información se ha enviado a Henutsen, inicie "
+"el proceso de etiquetado.</p>"
 
 #. module: stock_picking_rest
 #: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_report_delivery_package_section_line_inherit
@@ -113,9 +116,19 @@ msgid "Button Confirm Invisible"
 msgstr "Visibilidad botón confirmar"
 
 #. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.view_pricelist_import_wizard_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__cg1_button_visible
 msgid "Cg1 Button Visible"
 msgstr "Visibilidad botón CG1"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.view_pricelist_import_wizard_form
+msgid "Columns:"
+msgstr "Columnas:"
 
 #. module: stock_picking_rest
 #: model:ir.model,name:stock_picking_rest.model_config_henutsen
@@ -134,16 +147,19 @@ msgstr "Confirmar"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__create_uid
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist_import_wizard__create_uid
 msgid "Created by"
 msgstr "Creado por"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__create_date
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist_import_wizard__create_date
 msgid "Created on"
 msgstr "Creado"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__display_name
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist_import_wizard__display_name
 msgid "Display Name"
 msgstr "Nombre"
 
@@ -156,6 +172,16 @@ msgstr "Guardado"
 #: model:ir.model.fields.selection,name:stock_picking_rest.selection__config_henutsen__state__draft
 msgid "Draft"
 msgstr "Borrador"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist__easy_import_available
+msgid "Easy Import Available"
+msgstr "Importación ligera disponible"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_res_config_settings__easy_import_pricelist
+msgid "Easy Import Pricelist"
+msgstr "Importación de precios ligera"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__email_henutsen
@@ -175,16 +201,14 @@ msgstr ""
 #. module: stock_picking_rest
 #: model:ir.model.fields,help:stock_picking_rest.field_config_henutsen__special_branch
 msgid ""
-"Enter the identification numbers of the special stores, stores registered "
-"as branches in Odoo, but that for CG1 are third parties. NOTE: Enter the id "
-"as it is registered in the contact (consider the verification digit) "
-"separated by comma(,), without spaces. Example: 123-1,231,321-0,432,543"
+"Enter the identification numbers of the special stores, stores registered as branches in Odoo, but "
+"that for CG1 are third parties. NOTE: Enter the id as it is registered in the contact (consider "
+"the verification digit) separated by comma(,), without spaces. Example: 123-1,231,321-0,432,543"
 msgstr ""
-"Ingrese los números de identificación de las tiendas especiales, tiendas "
-"registradas como Sucursales en Odoo, pero que para CG1 son terceros. NOTA: "
-"Ingrese el identificador como está registrado en el contacto (Tenga en "
-"cuenta el dígito de verificación) separado por coma (,), sin espacios. "
-"Ejemplo: 123-1,231,321-0,432,543"
+"Ingrese los números de identificación de las tiendas especiales, tiendas registradas como "
+"Sucursales en Odoo, pero que para CG1 son terceros. NOTA: Ingrese el identificador como está "
+"registrado en el contacto (Tenga en cuenta el dígito de verificación) separado por coma (,), sin "
+"espacios. Ejemplo: 123-1,231,321-0,432,543"
 
 #. module: stock_picking_rest
 #. odoo-python
@@ -208,6 +232,30 @@ msgid "FAILED. Unknown error in the response request."
 msgstr "FAILED. Error desconocido en la respuesta del servicio."
 
 #. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist_import_wizard__file
+msgid "File"
+msgstr "Archivo"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist_import_wizard__file_name
+msgid "File Name"
+msgstr "Nombre del archivo"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/wizards/product_pricelist_import_wizard.py:0
+#, python-format
+msgid "File must be an Excel file."
+msgstr "El archivo debe ser tipo Excel."
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/wizards/product_pricelist_import_wizard.py:0
+#, python-format
+msgid "File not detected. Please select a file to import."
+msgstr "Archivo no detectado. Seleccione un archivo para importar."
+
+#. module: stock_picking_rest
 #: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
 msgid "Generate RFID codes in Henutsen"
 msgstr "Generar códigos en Henutsen"
@@ -225,10 +273,11 @@ msgstr "Conexión Henutsen"
 #. module: stock_picking_rest
 #: model:ir.ui.menu,name:stock_picking_rest.config_henutsen_menu
 msgid "Henutsen RFID"
-msgstr "Henutsen RFID"
+msgstr "Ajustes Aristextil"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__id
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist_import_wizard__id
 msgid "ID"
 msgstr ""
 
@@ -236,6 +285,17 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_picking_rest.field_stock_quant__id_ajuste
 msgid "ID Adjustment"
 msgstr "ID Ajuste"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.view_pricelist_import_wizard_form
+msgid ""
+"IMPORTANT: Be sure to import the file for the correct pricelist (You can not select the pricelist "
+"in this wizard, \n"
+"                            but the system will use the pricelist selected in this view)"
+msgstr ""
+"IMPORTANTE: Asegúrese de importar el archivo para la lista de precios correcta (Podría no "
+"seleccionar la lista de precios en esta ventana,\n"
+"                            pero el sistema utilizará la lista de precios seleccionada en la vista)"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,help:stock_picking_rest.field_res_config_settings__recieve_packing_from_henutsen
@@ -250,12 +310,37 @@ msgid "If checked, the system will be able to send packing to Henutsen"
 msgstr "El sistema estará habilitado para enviar el packing a Henutsen"
 
 #. module: stock_picking_rest
+#: model:ir.model.fields,help:stock_picking_rest.field_res_config_settings__easy_import_pricelist
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.res_config_settings_view_form
+msgid "If checked, the system will be enable the easy import pricelist mode"
+msgstr "Habilite la importación ligera de precios en listas"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.view_pricelist_import_wizard_form
+msgid "Import"
+msgstr "Importar"
+
+#. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/models/product_pricelist.py:0
+#: model:ir.actions.act_window,name:stock_picking_rest.action_pricelist_import_wizard
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.product_pricelist_inherit_view
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.view_pricelist_import_wizard_form
+#, python-format
+msgid "Import Pricelist"
+msgstr "Importar Precios a Lista"
+
+#. module: stock_picking_rest
 #: model:ir.model.fields,help:stock_picking_rest.field_stock_quant_package__package_weight
-msgid ""
-"Insert the weight in kilograms of the box, after packaging the products"
+msgid "Insert the weight in kilograms of the box, after packaging the products"
 msgstr ""
-"Inserte el peso total de la caja en kilogramos, después de llevar a cabo el "
-"empaquetado de productos"
+"Inserte el peso total de la caja en kilogramos, después de llevar a cabo el empaquetado de "
+"productos"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.view_pricelist_import_wizard_form
+msgid "Internal refrerence: The value can't be empty and must not contain special characters"
+msgstr "Referencia interna: El valor no puede estar vacío y no debe contener caracteres especiales"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__is_executed
@@ -269,11 +354,13 @@ msgstr "Es producción"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__write_uid
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist_import_wizard__write_uid
 msgid "Last Updated by"
 msgstr "Última modificación por"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__write_date
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist_import_wizard__write_date
 msgid "Last Updated on"
 msgstr "Ultima modificación"
 
@@ -290,18 +377,22 @@ msgid "Location not found, validate the location name"
 msgstr "Ubicación no encontrada, valide el nombre de la ubicación"
 
 #. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order__main_location_id
+#: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order_line__main_location_id
+msgid "Main location"
+msgstr "Ubicación principal"
+
+#. module: stock_picking_rest
 #. odoo-python
 #: code:addons/stock_picking_rest/models/product_template.py:0
 #: code:addons/stock_picking_rest/models/stock_inherit.py:0
 #, python-format
 msgid ""
-"Missing data in Henutsen configuration, validate that all fields are "
-"complete, if you do not have access, ask an administrator to update this "
-"information"
+"Missing data in Henutsen configuration, validate that all fields are complete, if you do not have "
+"access, ask an administrator to update this information"
 msgstr ""
-"Información faltante en la configuración de endpoints, valide que todos los "
-"campos estén diligenciados. Si no tiene acceso, solicítele a un "
-"administrador la actualización de información"
+"Información faltante en la configuración de endpoints, valide que todos los campos estén "
+"diligenciados. Si no tiene acceso, solicítele a un administrador la actualización de información"
 
 #. module: stock_picking_rest
 #. odoo-python
@@ -365,6 +456,21 @@ msgid "Price in pricelist"
 msgstr "Precio en lista"
 
 #. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.view_pricelist_import_wizard_form
+msgid ""
+"Price in pricelist: The value can't be empty and must be a number, don't use currency symbol or "
+"thousand/decimal separator"
+msgstr ""
+"Precio en la lista: El valor no puede estar vacío y debe ser un número, no utilice el símbolo de "
+"moneda o el separador mil/decimal"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_product_pricelist
+#: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist_import_wizard__pricelist_id
+msgid "Pricelist"
+msgstr "Lista de Precios"
+
+#. module: stock_picking_rest
 #: model:ir.model,name:stock_picking_rest.model_product_template
 msgid "Product"
 msgstr "Producto"
@@ -373,6 +479,11 @@ msgstr "Producto"
 #: model:ir.model,name:stock_picking_rest.model_product_attribute
 msgid "Product Attribute"
 msgstr "Atributo del Producto"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_product_pricelist_import_wizard
+msgid "Product Pricelist Import"
+msgstr "Importación de precio de producto en lista"
 
 #. module: stock_picking_rest
 #: model:ir.model,name:stock_picking_rest.model_product_product
@@ -415,6 +526,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_picking_rest.field_res_config_settings__recieve_packing_from_henutsen
 msgid "Recieve Packing From Henutsen"
 msgstr "Recibir Packing desde Henutsen"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.purchase_order_form_view_inherit
+msgid "Recompute all prices based on this pricelist"
+msgstr "Recalcular todos los precios basándose en esta lista de precios"
 
 #. module: stock_picking_rest
 #: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
@@ -460,6 +576,15 @@ msgstr "Guardar"
 #: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
 msgid "Saved"
 msgstr "Guardado"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.view_pricelist_import_wizard_form
+msgid ""
+"Select the file to import, the file must be an Excel file (.xls or .xlsx) and must contain the "
+"following structure:"
+msgstr ""
+"Seleccione el archivo a importar, el archivo debe ser tipo Excel (.xls o .xlsx) y debe contener la "
+"siguiente estructura:"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__send_button_visible
@@ -552,6 +677,23 @@ msgid "Test"
 msgstr ""
 
 #. module: stock_picking_rest
+#. odoo-python
+#: code:addons/stock_picking_rest/wizards/product_pricelist_import_wizard.py:0
+#, python-format
+msgid "This file does not correspond to the selected pricelist."
+msgstr "Este archivo no corresponde a la lista de precios seleccionada."
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.purchase_order_form_view_inherit
+msgid ""
+"This will update the fixed price of all products based on the pricelist of the store and the stock "
+"based on partner storage. Be sure to select the correct provider before updating the prices."
+msgstr ""
+"Esto actualizará el precio fijo de todos los productos basado en la lista de precios de la tienda "
+"y el stock basado en el almacenamiento del proveedor. Asegúrese de seleccionar el proveedor "
+"correcto antes de actualizar los precios."
+
+#. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order_line__total_inline
 msgid "Total in line"
 msgstr "Total en línea"
@@ -570,6 +712,16 @@ msgstr "Peso total (Kg)"
 #: model:ir.model,name:stock_picking_rest.model_stock_picking
 msgid "Transfer"
 msgstr "Transferir"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.purchase_order_form_view_inherit
+msgid "Update Prices"
+msgstr "Actualizar precios y stock"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order__update_buttons_visibility
+msgid "Update buttons visibility"
+msgstr "Actualizar la visibilidad de los botones"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_bearer

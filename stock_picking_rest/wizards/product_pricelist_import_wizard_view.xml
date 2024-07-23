@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pricelist_import_wizard_form" model="ir.ui.view">
+        <field name="name">product.pricelist.import.wizard.form</field>
+        <field name="model">product.pricelist.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import Pricelist">
+                <header>
+                    <div style="margin-bottom:16px;">
+                        <p style="font-weight:bold; margin-bottom:8px;">
+                            Select the file to import, the file must be an Excel file (.xls or .xlsx) and must contain the following structure:
+                        </p>
+                        <p style="margin-left:16px; margin-bottom:4px;">
+                            Columns:
+                        </p>
+                        <ul style="margin-left:32px;">
+                            <li>Internal refrerence: The value can't be empty and must not contain special characters</li>
+                            <li>Price in pricelist: The value can't be empty and must be a number, don't use currency symbol or thousand/decimal separator</li>
+                        </ul>
+                        <p style="font-weight:bold; margin-bottom:8px;">
+                            IMPORTANT: Be sure to import the file for the correct pricelist (You can not select the pricelist in this wizard, 
+                            but the system will use the pricelist selected in this view)
+                        </p>
+                    </div>
+                </header>
+                <group>
+                    <field name="file" filename="file_name"/>
+                    <field name="pricelist_id" />
+                    <field name="file_name" invisible="1"/>
+                </group>
+                <footer>
+                    <button string="Import" type="object" name="import_pricelist" class="btn-primary" default_focus="1"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_pricelist_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import Pricelist</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.pricelist.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -36,6 +36,8 @@
         'views/sale_order_view.xml',
         'views/product_template_view.xml',
         'views/product_attribute_view.xml',
+        'views/product_pricelist_view.xml',
+        'wizards/product_pricelist_import_wizard_view.xml',
         'reports/report_deliveryslip.xml',
     ],
     'application': True,

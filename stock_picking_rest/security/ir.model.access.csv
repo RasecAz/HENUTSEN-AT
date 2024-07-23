@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 stock_picking_rest.access_config_henutsen,access_config_henutsen,stock_picking_rest.model_config_henutsen,base.group_no_one,1,1,1,1
+stock_picking_rest.access_product_pricelist_import_wizard,access_product_pricelist_import_wizard,stock_picking_rest.model_product_pricelist_import_wizard,base.group_user,1,1,1,1
