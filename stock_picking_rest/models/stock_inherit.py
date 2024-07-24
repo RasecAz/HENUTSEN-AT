@@ -199,6 +199,8 @@ class StockInherit(models.Model):
                 "CMPETRM_LOCAL": "03",
                 "Detalle": list(cg1_detalle.values())
             })
+
+            _logger.info(cg1_json)
             
             response = requests.request("POST", service_url, headers=headers, data=cg1_json)
 
