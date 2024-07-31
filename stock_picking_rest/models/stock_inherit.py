@@ -573,6 +573,11 @@ class StockInherit(models.Model):
             return {'error': _(f'No picking order found with sale order {data["consecutive"]}. Check the order number and try again.')}
         if context.state == 'done':
             return {'error': _(f'The operation {context.name} has already been validated. It is not possible to perform the reception.')}
+        if 'complete' in data and isinstance(data['complete'], bool) and data['complete']:
+            super().button_validate()
+            return {
+                'success': _(f'The order {context.name} has been validated successfully.')
+            }
         product_list = []
         for product in data['productList']:
             productos = self.env['product.product'].sudo().search([('default_code', '=', product['productSku'].rstrip())])
