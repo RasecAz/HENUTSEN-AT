@@ -212,6 +212,7 @@ class StockInherit(models.Model):
                     self.message_post(body=body_mensaje, message_type='notification')
                     self.rfid_response = "SUCCESS"
                     self.ribbon_visible = True
+                    self.ribbon_error = False
                     self.response = response.text
                 elif "error" in response_json or "detail" in response_json:
                     self.rfid_response = _("FAILED. Error in the response request.")
@@ -408,17 +409,16 @@ class StockInherit(models.Model):
 
             record.send_button_visible = es_picking and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS"
             record.packing_button_visible = es_packing and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS" and is_send_mode
-            record.cg1_button_visible = es_salida and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS"
+            record.cg1_button_visible = es_salida and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and not record.ribbon_visible
 
     # INFO: Método que calcula la cantidad total de productos en la orden de salida (Para el vale de entrega) 
     @api.depends('state')
     def _compute_total_order(self):
         for record in self:
             total = 0
-            if record.state == 'done':
-                for product in record.move_ids:
-                    total += product.quantity
-                record.total_order = total
+            for product in record.move_ids:
+                total += product.quantity
+            record.total_order = total
     
     def get_config_params(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
@@ -453,14 +453,22 @@ class StockInherit(models.Model):
             return config_params.get_bearer_qa()
         
     def button_validate(self):
-        for move in self.move_ids:
-            if move.move_dest_ids:
-                for move_dest_id in move.move_dest_ids:
-                    if move_dest_id.product_qty < move.quantity:
-                        move_dest_id.product_qty = move.quantity
-                        move_dest_id.quantity = move.quantity
-                        # move_dest_id.product_uom_qty = move.quantity
+        origin_ids = self.move_ids.move_orig_ids if self.move_ids.move_orig_ids else False
+        if origin_ids and len(origin_ids) > 1:
+            real_origin_id = self.env['stock.picking'].sudo().search([('name', '=', max(self.move_ids.move_orig_ids, key=lambda x: x.create_date).reference)], limit=1)
+        else:
+            real_origin_id = origin_ids
+        if real_origin_id and real_origin_id.state != 'done':
+            raise UserError(_('La operación anterior (%s) no ha sido validada aún.', real_origin_id.name))
         res = super(StockInherit, self).button_validate()
+        for record in self:
+            if record.move_ids.move_dest_ids:
+                if len(record.move_ids.move_dest_ids) > 1:
+                    most_recent_move = min(record.move_ids.move_dest_ids, key=lambda x: x.create_date).reference
+                else:
+                    most_recent_move = record.move_ids.move_dest_ids.reference
+                context = self.env['stock.picking'].sudo().search([('name', '=', most_recent_move)], limit=1)
+                context.script_recompute_quantities()
         return res
     
     @api.model
@@ -568,16 +576,14 @@ class StockInherit(models.Model):
     
     @api.model
     def receive_order(self, data):
+        json_str = json.dumps(data)
+        _logger.info(json_str)
         context = self.env['stock.picking'].sudo().search([('purchase_id.partner_ref', '=', data['consecutive']),('picking_type_id.sequence_code', '=', 'IN')], limit=1)
+        context_warehouse = self.env['stock.picking'].sudo().search([('origin', '=', data['consecutive']), ('picking_type_id.sequence_code', '=', 'OUT')], limit=1)
         if not context:
-            return {'error': _(f'No picking order found with sale order {data["consecutive"]}. Check the order number and try again.')}
+            return {'error': _(f'No reception order found with sale order {data["consecutive"]}. Check the order number and try again.')}
         if context.state == 'done':
             return {'error': _(f'The operation {context.name} has already been validated. It is not possible to perform the reception.')}
-        if 'complete' in data and isinstance(data['complete'], bool) and data['complete']:
-            super().button_validate()
-            return {
-                'success': _(f'The order {context.name} has been validated successfully.')
-            }
         product_list = []
         for product in data['productList']:
             productos = self.env['product.product'].sudo().search([('default_code', '=', product['productSku'].rstrip())])
@@ -604,11 +610,19 @@ class StockInherit(models.Model):
                 return {'error': _(f"The product {product['productSku']} was not found with the defined variants. Check the variant, SKU and try again.")}
             
             if not 'batchNumber' in product or product['batchNumber'] == '':
-                lote = False
-            else:
-                lote = self.env['stock.lot'].sudo().search([('name', '=', product['batchNumber']), ('product_id.id', '=', producto_variante.id), ('company_id.id', '=', context.company_id.id)])
-                if not lote:
+                move_line = context_warehouse.move_line_ids.filtered(lambda line: line.product_id == producto_variante)       
+                if move_line:
+                    lote = move_line[0].lot_id.name
+                else:
                     lote = False
+            else:
+                lote = context.env['stock.lot'].sudo().search([('name', '=', product['batchNumber']), ('product_id.id', '=', producto_variante.id), ('company_id.id', '=', context.company_id.id)]).name
+                if not lote:
+                    move_line = context_warehouse.move_line_ids.filtered(lambda line: line.product_id == producto_variante)        
+                    if move_line:
+                        lote = move_line[0].lot_id.name
+                    else:
+                        lote = False
             product_list.append({
                 'product_id': producto_variante,
                 'lot_id': lote,
@@ -621,14 +635,27 @@ class StockInherit(models.Model):
             if move_context:
                 move_context.product_uom_qty = product['quantity']
             if move_context and product['lot_id']:
-                move_line = context.move_line_ids.filtered(lambda ml: ml.move_id.id == move_context.id and ml.lot_id.id == product['lot_id'].id)
+                move_line = context.move_line_ids.filtered(lambda ml: ml.move_id.id == move_context.id and ml.lot_id.name == product['lot_id'])
             if not move_line:
                 move_line = context.move_line_ids.filtered(lambda ml: ml.move_id.id == move_context.id and not ml.lot_id)
             if move_line:
                 move_line.quantity = product['quantity'] - product['missing_quantity']
+                move_line.lot_name = product['lot_id']
             else:
                 return {'error': _(f"Product {product['product_id'].name} not found in the operation. Check the product and try again.")}
-        
+        if isinstance(data['complete'], bool) and data['complete']:
+            context.rfid_response = "COMPLETE"
+            body_mensaje = Markup(
+                _(f'''
+                <h2>¡Recepción completa!</h2>
+                <p>La recepción de la orden ha sido completada con éxito. Se han actualizado las unidades de acuerdo a lo desplachado</p>
+                '''
+            ))
+            context.message_post(body=body_mensaje, message_type='notification')
+            super(StockInherit, context).button_validate()
+            return {
+                'success': _(f'Order reception without missings, complete for operation {context.name}!')
+            }
         body_mensaje = Markup(
             _(f'''
             <h2>¡Se reportaron productos faltantes en la recepción!</h2>
@@ -660,21 +687,27 @@ class StockInherit(models.Model):
                     most_recent_move = max(move.move_orig_ids, key=lambda x: x.create_date)
                 else:
                     most_recent_move = move.move_orig_ids
-                move.move_line_ids.unlink()
-                for line in most_recent_move.move_line_ids:
-                    self.move_line_ids.create({
-                        'picking_id': move.picking_id.id,
-                        'move_id': move.id,
-                        'product_id': line.product_id.id,
-                        'quantity': line.quantity,
-                        'quantity_product_uom': line.quantity_product_uom,
-                        'product_uom_id': line.product_uom_id.id,
-                        'lot_id': line.lot_id.id if line.lot_id else False,
-                        'location_id': move.location_id.id,
-                        'location_dest_id': move.location_dest_id.id,
-                    })
+                if most_recent_move.quantity == 0:
+                    move.write({'quantity': most_recent_move.quantity})
+                else:
+                    move.move_line_ids.unlink()
+                    for line in most_recent_move.move_line_ids:                      
+                        self.move_line_ids.create({
+                            'picking_id': move.picking_id.id,
+                            'move_id': move.id,
+                            'product_id': line.product_id.id,
+                            'quantity': line.quantity,
+                            'package_id': line.result_package_id.id if line.result_package_id else False,
+                            'result_package_id': line.result_package_id.id if line.result_package_id else False,
+                            'quantity_product_uom': line.quantity_product_uom,
+                            'product_uom_id': line.product_uom_id.id,
+                            'lot_id': line.lot_id.id if line.lot_id else False,
+                            'location_id': move.location_id.id,
+                            'location_dest_id': move.location_dest_id.id,
+                        })
 
-        return True
+        return True          
+
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
