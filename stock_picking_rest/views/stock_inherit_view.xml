@@ -18,6 +18,7 @@
                 <widget name="web_ribbon" title="Wrong Sending" bg_color="text-bg-danger" invisible="not ribbon_error"/>
                 <widget name="web_ribbon" title="Missing reported" bg_color="text-bg-danger" invisible="rfid_response != 'MISSING_PRODUCTS'"/>
                 <widget name="web_ribbon" title="Service Failed" bg_color="text-bg-danger" invisible="rfid_response != 'FAILED'"/>
+                <widget name="web_ribbon" title="Validado Henutsen" bg_color="text-bg-info" invisible="rfid_response != 'COMPLETE'"/>
 
             </xpath>
             <xpath expr='//notebook' position="inside">
@@ -42,7 +43,7 @@
                 <button name="send_packing_to_henutsen" invisible="not packing_button_visible" string="Send to RFID Verification" type="object" class="oe_highlight"/>
             </xpath>
             <xpath expr="//group[@name='other_infos']" position="inside">
-                <field name="total_order" invisible="state != 'done'" />
+                <field name="total_order" />
             </xpath>
         </field>
     </record>
