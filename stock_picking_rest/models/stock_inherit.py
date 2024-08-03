@@ -88,6 +88,7 @@ class StockInherit(models.Model):
         for move in self.move_ids:
             if move.move_dest_ids and move.move_dest_ids.reference:
                 operacion_packing = move.move_dest_ids.reference
+                break
             else:
                 operacion_packing = ""
 
