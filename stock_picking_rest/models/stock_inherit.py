@@ -454,14 +454,22 @@ class StockInherit(models.Model):
             return config_params.get_bearer_qa()
         
     def button_validate(self):
-        for move in self.move_ids:
-            if move.move_dest_ids:
-                for move_dest_id in move.move_dest_ids:
-                    if move_dest_id.product_qty < move.quantity:
-                        move_dest_id.product_qty = move.quantity
-                        move_dest_id.quantity = move.quantity
-                        # move_dest_id.product_uom_qty = move.quantity
+        origin_ids = self.move_ids.move_orig_ids if self.move_ids.move_orig_ids else False
+        if origin_ids and len(origin_ids) > 1:
+            real_origin_id = self.env['stock.picking'].sudo().search([('name', '=', max(self.move_ids.move_orig_ids, key=lambda x: x.create_date).reference)], limit=1)
+        else:
+            real_origin_id = origin_ids
+        if real_origin_id and real_origin_id.state != 'done':
+            raise UserError(_('La operación anterior (%s) no ha sido validada aún.', real_origin_id.name))
         res = super(StockInherit, self).button_validate()
+        for record in self:
+            if record.move_ids.move_dest_ids:
+                if len(record.move_ids.move_dest_ids) > 1:
+                    most_recent_move = min(record.move_ids.move_dest_ids, key=lambda x: x.create_date).reference
+                else:
+                    most_recent_move = record.move_ids.move_dest_ids.reference
+                context = self.env['stock.picking'].sudo().search([('name', '=', most_recent_move)], limit=1)
+                context.script_recompute_quantities()
         return res
     
     @api.model
