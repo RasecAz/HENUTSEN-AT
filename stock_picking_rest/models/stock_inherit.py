@@ -680,38 +680,45 @@ class StockInherit(models.Model):
     def script_recompute_quantities(self):
         if self.state == 'done':
             raise UserError(_('La operación ya fue validada, no es posible recomputar las cantidades.'))
+        
+        product_move_dict = []
+
+        origin_move = next((move.move_orig_ids for move in self.move_ids if move.move_orig_ids), False)
+
         for move in self.move_ids:
-            if move.move_orig_ids:
-                origin_move = move.move_orig_ids
-                break
+            product_id = move.product_id.id
+            if product_id in product_move_dict:
+                move.product_uom_qty, move.quantity = 0, 0
+                move.move_line_ids.unlink()
             else:
-                origin_move = False
-        for move in self.move_ids:
-            if not origin_move:
-                move.quantity = move.product_uom_qty
-            else:
-                if len(move.move_orig_ids) > 1:
-                    most_recent_move = max(move.move_orig_ids, key=lambda x: x.create_date)
+                product_move_dict.append(product_id)
+                if not origin_move:
+                    move.quantity = move.product_uom_qty
                 else:
-                    most_recent_move = move.move_orig_ids
-                if most_recent_move.quantity == 0:
-                    move.write({'quantity': 0})
-                else:
-                    move.move_line_ids.unlink()
-                    for line in most_recent_move.move_line_ids:                      
-                        self.move_line_ids.create({
-                            'picking_id': move.picking_id.id,
-                            'move_id': move.id,
-                            'product_id': line.product_id.id,
-                            'quantity': line.quantity,
-                            'package_id': line.result_package_id.id if line.result_package_id else False,
-                            'result_package_id': line.result_package_id.id if line.result_package_id else False,
-                            'quantity_product_uom': line.quantity_product_uom,
-                            'product_uom_id': line.product_uom_id.id,
-                            'lot_id': line.lot_id.id if line.lot_id else False,
-                            'location_id': move.location_id.id,
-                            'location_dest_id': move.location_dest_id.id,
-                        })
+                    if len(move.move_orig_ids) > 1:
+                        most_recent_move = max(move.move_orig_ids, key=lambda x: x.create_date)
+                    else:
+                        most_recent_move = move.move_orig_ids
+                    if most_recent_move.quantity == 0:
+                        move.write({'quantity': 0})
+                    else:
+                        if most_recent_move.product_uom_qty != move.product_uom_qty:
+                            move.write({'product_uom_qty': most_recent_move.product_uom_qty})
+                        move.move_line_ids.unlink()
+                        for line in most_recent_move.move_line_ids:                      
+                            self.move_line_ids.create({
+                                'picking_id': move.picking_id.id,
+                                'move_id': move.id,
+                                'product_id': line.product_id.id,
+                                'quantity': line.quantity,
+                                'package_id': line.result_package_id.id if line.result_package_id else False,
+                                'result_package_id': line.result_package_id.id if line.result_package_id else False,
+                                'quantity_product_uom': line.quantity_product_uom,
+                                'product_uom_id': line.product_uom_id.id,
+                                'lot_id': line.lot_id.id if line.lot_id else False,
+                                'location_id': move.location_id.id,
+                                'location_dest_id': move.location_dest_id.id,
+                            })
 
         return True         
 
