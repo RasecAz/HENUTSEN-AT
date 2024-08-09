@@ -454,13 +454,13 @@ class StockInherit(models.Model):
             return config_params.get_bearer_qa()
         
     def button_validate(self):
-        origin_ids = self.move_ids.move_orig_ids if self.move_ids.move_orig_ids else False
-        if origin_ids and len(origin_ids) > 1:
-            real_origin_id = self.env['stock.picking'].sudo().search([('name', '=', max(self.move_ids.move_orig_ids, key=lambda x: x.create_date).reference)], limit=1)
-        else:
-            real_origin_id = origin_ids
-        if real_origin_id and real_origin_id.state != 'done':
-            raise UserError(_('La operación anterior (%s) no ha sido validada aún.', real_origin_id.name))
+        # origin_ids = self.move_ids.move_orig_ids if self.move_ids.move_orig_ids else False
+        # if origin_ids and len(origin_ids) > 1:
+        #     real_origin_id = self.env['stock.picking'].sudo().search([('name', '=', max(self.move_ids.move_orig_ids, key=lambda x: x.create_date).reference)], limit=1)
+        # else:
+        #     real_origin_id = origin_ids
+        # if real_origin_id and real_origin_id.state != 'done':
+        #     raise UserError(_('La operación anterior (%s) no ha sido validada aún.', real_origin_id.name))
         res = super(StockInherit, self).button_validate()
         for record in self:
             if record.move_ids.move_dest_ids:
