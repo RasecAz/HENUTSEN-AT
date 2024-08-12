@@ -18,15 +18,16 @@
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
-    'category': 'Uncategorized',
-    'version': '17.0.1.2',
+    'category': 'Inventory',
+    'version': '17.0.2.31',
 
-    # any module necessary for this one to work correctly
     'depends': ['base','stock','contacts', 'sale', 'purchase'],
 
-    # always loaded
     'data': [
+        # Security
         'security/ir.model.access.csv',
+
+        # Views
         'views/res_config_settings_view.xml',
         'views/stock_inherit_view.xml',
         'views/stock_quant_package_view.xml',
@@ -37,8 +38,13 @@
         'views/product_template_view.xml',
         'views/product_attribute_view.xml',
         'views/product_pricelist_view.xml',
+
+        # Wizards
         'wizards/product_pricelist_import_wizard_view.xml',
+
+        # Reports
         'reports/report_deliveryslip.xml',
+        'reports/report_stockpicking_operations.xml',
     ],
     'application': True,
     'license': 'LGPL-3',
