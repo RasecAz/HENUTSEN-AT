@@ -463,13 +463,16 @@ class StockInherit(models.Model):
         #     raise UserError(_('La operación anterior (%s) no ha sido validada aún.', real_origin_id.name))
         res = super(StockInherit, self).button_validate()
         for record in self:
-            if record.move_ids.move_dest_ids:
-                if len(record.move_ids.move_dest_ids) > 1:
-                    most_recent_move = min(record.move_ids.move_dest_ids, key=lambda x: x.create_date).reference
-                else:
-                    most_recent_move = record.move_ids.move_dest_ids.reference
-                context = self.env['stock.picking'].sudo().search([('name', '=', most_recent_move)], limit=1)
-                context.script_recompute_quantities()
+            if record.picking_type_id.sequence_code == "OUT":
+                pass
+            else:
+                if record.move_ids.move_dest_ids:
+                    if len(record.move_ids.move_dest_ids) > 1:
+                        most_recent_move = min(record.move_ids.move_dest_ids, key=lambda x: x.create_date).reference
+                    else:
+                        most_recent_move = record.move_ids.move_dest_ids.reference
+                    context = self.env['stock.picking'].sudo().search([('name', '=', most_recent_move)], limit=1)
+                    context.script_recompute_quantities()
         return res
     
     @api.model
@@ -680,11 +683,10 @@ class StockInherit(models.Model):
     def script_recompute_quantities(self):
         if self.state == 'done':
             raise UserError(_('La operación ya fue validada, no es posible recomputar las cantidades.'))
-        
         product_move_dict = []
 
         origin_move = next((move.move_orig_ids for move in self.move_ids if move.move_orig_ids), False)
-
+        origin_reference = origin_move.reference if origin_move else False
         for move in self.move_ids:
             product_id = move.product_id.id
             if product_id in product_move_dict:
@@ -695,8 +697,8 @@ class StockInherit(models.Model):
                 if not origin_move:
                     move.quantity = move.product_uom_qty
                 else:
-                    if len(move.move_orig_ids) > 1:
-                        most_recent_move = max(move.move_orig_ids, key=lambda x: x.create_date)
+                    if len(move.move_orig_ids) > 1:                      
+                        most_recent_move = move.move_orig_ids.filtered(lambda x: x.reference == origin_reference)
                     else:
                         most_recent_move = move.move_orig_ids
                     if most_recent_move.quantity == 0:
