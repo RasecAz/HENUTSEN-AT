@@ -730,3 +730,20 @@ class StockMove(models.Model):
 
     def _set_product_qty(self):
         return True
+
+class StockMoveLine(models.Model):
+    _inherit = 'stock.move.line'
+
+    default_code_integer = fields.Integer(
+        'Default Code Integer', 
+        compute='_compute_default_code_integer', 
+        store=True
+    )
+
+    @api.depends('product_id.default_code')
+    def _compute_default_code_integer(self):
+        for record in self:
+            try:
+                record.default_code_integer = int(record.product_id.default_code) if record.product_id.default_code else 0
+            except (ValueError, TypeError):
+                record.default_code_integer = 0
