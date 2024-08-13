@@ -3,7 +3,7 @@
 
     <template id="report_picking_inherit" name="template_name" inherit_id="stock.report_picking">
         <xpath expr="//table[1]/tbody/tr" position="attributes">
-            <attribute name="t-foreach">o.move_line_ids_without_package.sorted(lambda ml: int(ml.product_id.default_code) if ml.product_id.default_code.isdigit() else ml.product_id.default_code)</attribute>
+            <attribute name="t-foreach">o.move_line_ids_without_package.sorted(lambda ml: (int(ml.product_id.default_code) if ml.product_id.default_code.isdigit() else ml.product_id.default_code, ml.id))</attribute>
         </xpath>
     </template>
 

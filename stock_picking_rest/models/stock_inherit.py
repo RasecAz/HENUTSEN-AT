@@ -684,6 +684,7 @@ class StockInherit(models.Model):
         if self.state == 'done':
             raise UserError(_('La operación ya fue validada, no es posible recomputar las cantidades.'))
         product_move_dict = []
+
         for move in self.move_ids:
             _logger.warning(move.product_id.name)
             for line in move.move_orig_ids:
@@ -698,7 +699,7 @@ class StockInherit(models.Model):
                 move.move_line_ids.unlink()
             else:
                 product_move_dict.append(product_id)
-                if not origin_move:
+                if not origin_move or self.picking_type_id.sequence_code == 'PICK':
                     move.quantity = move.product_uom_qty
                 else:
                     if len(move.move_orig_ids) > 1:                      
