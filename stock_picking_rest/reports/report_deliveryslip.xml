@@ -44,42 +44,42 @@
             </xpath>
             <!-- Primer caso sorted-->
             <xpath expr="//table[@name='stock_move_table']/tbody/t" position="attributes">
-                <attribute name="t-value">o.move_ids.sorted(key=lambda x: int(x.product_id.default_code) if x.product_id.default_code.isdigit() else x.product_id.default_code).filtered(lambda x: x.product_uom_qty)</attribute>
+                <attribute name="t-value">o.move_ids.sorted(key=lambda x: (int(x.product_id.default_code) if x.product_id.default_code.isdigit() else x.product_id.default_code, x.id)).filtered(lambda x: x.product_uom_qty)</attribute>
             </xpath>
 
             <!-- Segundo caso sorted-->
             <xpath expr="//table[@name='stock_move_line_table']/t[2]" position="attributes">
-                <attribute name="t-value">o.move_line_ids.sorted(key=lambda x: int(x.product_id.default_code) if x.product_id.default_code.isdigit() else x.product_id.default_code).mapped('lot_id')</attribute>
+                <attribute name="t-value">o.move_line_ids.sorted(key=lambda x: (int(x.product_id.default_code) if x.product_id.default_code.isdigit() else x.product_id.default_code, x.id)).mapped('lot_id')</attribute>
             </xpath>
 
             <!-- Tercer caso sorted-->
             <xpath expr="//table[@name='stock_move_line_table']/tbody/t[1]/t[@t-set='packages']" position="attributes">
-                <attribute name="t-value">o.move_line_ids.sorted(key=lambda x: int(x.product_id.default_code) if x.product_id.default_code.isdigit() else x.product_id.default_code).mapped('result_package_id')</attribute>
+                <attribute name="t-value">o.move_line_ids.sorted(key=lambda x: (int(x.product_id.default_code) if x.product_id.default_code.isdigit() else x.product_id.default_code, x.id)).mapped('result_package_id')</attribute>
             </xpath>
 
             <!-- Cuarto caso sorted-->
             <xpath expr="//table[@name='stock_move_line_table']/tbody/t[1]/t[@t-foreach='packages']/t[@t-set='package_move_lines']" position="attributes">
-                <attribute name="t-value">o.move_line_ids.sorted(key=lambda l: int(l.product_id.default_code) if l.product_id.default_code.isdigit() else l.product_id.default_code).filtered(lambda l: l.result_package_id == package)</attribute>
+                <attribute name="t-value">o.move_line_ids.sorted(key=lambda l: (int(l.product_id.default_code) if l.product_id.default_code.isdigit() else l.product_id.default_code, l.id)).filtered(lambda l: l.result_package_id == package)</attribute>
             </xpath>
 
             <!-- Quinto caso sorted-->
             <xpath expr="//table[@name='stock_move_line_table']/tbody/t[1]/t[@t-set='move_lines']" position="attributes">
-                <attribute name="t-value">o.move_line_ids.sorted(key=lambda l: int(l.product_id.default_code) if l.product_id.default_code.isdigit() else l.product_id.default_code).filtered(lambda l: not l.result_package_id)</attribute>
+                <attribute name="t-value">o.move_line_ids.sorted(key=lambda l: (int(l.product_id.default_code) if l.product_id.default_code.isdigit() else l.product_id.default_code, l.id)).filtered(lambda l: not l.result_package_id)</attribute>
             </xpath>
 
             <!-- Sexto caso sorted-->
             <xpath expr="//table[@name='stock_move_line_table']/tbody/t[1]/t[@t-set='aggregated_lines'][1]" position="attributes">
-                <attribute name="t-value">o.move_line_ids.sorted(key=lambda l: int(l.product_id.default_code) if l.product_id.default_code.isdigit() else l.product_id.default_code)._get_aggregated_product_quantities(except_package=True)</attribute>
+                <attribute name="t-value">o.move_line_ids.sorted(key=lambda l: (int(l.product_id.default_code) if l.product_id.default_code.isdigit() else l.product_id.default_code, l.id))._get_aggregated_product_quantities(except_package=True)</attribute>
             </xpath>
 
             <!-- Séptimo caso sorted-->
             <xpath expr="//table[@name='stock_move_line_table']/tbody/t[2]/t[1]/tr" position="attributes">
-                <attribute name="t-foreach">o.move_line_ids.sorted(key=lambda x: int(x.product_id.default_code) if x.product_id.default_code.isdigit() else x.product_id.default_code)</attribute>
+                <attribute name="t-foreach">o.move_line_ids.sorted(key=lambda x: (int(x.product_id.default_code) if x.product_id.default_code.isdigit() else x.product_id.default_code, x.id))</attribute>
             </xpath>
 
             <!-- Octavo caso sorted-->
             <xpath expr="//table[@name='stock_move_line_table']/tbody/t[2]/t[2]/t[@t-set='aggregated_lines']" position="attributes">
-                <attribute name="t-value">o.move_line_ids.sorted(key=lambda l: int(l.product_id.default_code) if l.product_id.default_code.isdigit() else l.product_id.default_code)._get_aggregated_product_quantities()</attribute>
+                <attribute name="t-value">o.move_line_ids.sorted(key=lambda l: (int(l.product_id.default_code) if l.product_id.default_code.isdigit() else l.product_id.default_code, l.id))._get_aggregated_product_quantities()</attribute>
             </xpath>
         </template>
     </data>
