@@ -635,9 +635,6 @@ class StockInherit(models.Model):
             })
         product_ids_in_list = [p['product_id'].id for p in product_list]
         moves_not_in_list = context.move_ids.filtered(lambda m: m.product_id.id not in product_ids_in_list)
-        for move in context.move_ids:
-            if move.product_id.id not in product_ids_in_list:
-                move.quantity = 0
         for product in product_list:
             move_line = False
             move_context = context.move_ids.filtered(lambda m: m.product_id.id == product['product_id'].id)
@@ -674,6 +671,7 @@ class StockInherit(models.Model):
                     '''
                 ))
             context.message_post(body=body_mensaje, message_type='notification')
+            moves_not_in_list.unlink()
             super(StockInherit, context).button_validate()
             return {
                 'success': _(f'Order reception without missings, complete for operation {context.name}!')
