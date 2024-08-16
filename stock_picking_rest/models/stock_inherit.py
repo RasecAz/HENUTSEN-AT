@@ -633,6 +633,8 @@ class StockInherit(models.Model):
                 'quantity': product['quantity'],
                 'missing_quantity': product['missingQuantity']
             })
+        product_ids_in_list = [p['product_id'].id for p in product_list]
+        moves_not_in_list = context.move_ids.filtered(lambda m: m.product_id.id not in product_ids_in_list)
         for product in product_list:
             move_line = False
             move_context = context.move_ids.filtered(lambda m: m.product_id.id == product['product_id'].id)
@@ -649,13 +651,27 @@ class StockInherit(models.Model):
                 return {'error': _(f"Product {product['product_id'].name} not found in the operation. Check the product and try again.")}
         if isinstance(data['complete'], bool) and data['complete']:
             context.rfid_response = "COMPLETE"
-            body_mensaje = Markup(
-                _(f'''
-                <h2>¡Recepción completa!</h2>
-                <p>La recepción de la orden ha sido completada con éxito. Se han actualizado las unidades de acuerdo a lo desplachado</p>
-                '''
-            ))
+            if moves_not_in_list:
+                body_mensaje = Markup(
+                    _(f'''
+                    <h2>¡Recepción completa!</h2>
+                    <p>La recepción de la orden ha sido completada con éxito. Se han actualizado las unidades de acuerdo a lo desplachado. Sin embargo, estos fueron los productos no enviados por planta</p>
+                    <li><strong>Productos que no envió planta:</strong>
+                        <ul>
+                            {''.join([f"<li>Producto: {move.product_id.display_name}. Cantidad pedida: {move.product_uom_qty}</li>" for move in moves_not_in_list])}
+                        </ul>
+                    </li>
+                    '''
+                ))
+            else:
+                body_mensaje = Markup(
+                    _(f'''
+                    <h2>¡Recepción completa!</h2>
+                    <p>La recepción de la orden ha sido completada con éxito. Se han actualizado las unidades de acuerdo a lo desplachado</p>
+                    '''
+                ))
             context.message_post(body=body_mensaje, message_type='notification')
+            moves_not_in_list.unlink()
             super(StockInherit, context).button_validate()
             return {
                 'success': _(f'Order reception without missings, complete for operation {context.name}!')
@@ -666,9 +682,14 @@ class StockInherit(models.Model):
             <p>Valide con Planta las discrepancias. Si desea recibir el pedido con dichos faltantes, presione "Validar".</p>
             <ul>
                 <li>Operación: {context.name}</li>
-                <li><strong>Productos:</strong>
+                <li><strong>Productos que llegaron:</strong>
                     <ul>
                         {''.join([f"<li>Producto: {product['product_id'].display_name}, Cantidad esperada: {product['quantity']} Unidades, Cantidad faltante: {product['missing_quantity']} Unidades.</li>" for product in product_list])}
+                    </ul>
+                </li>
+                <li><strong>Productos que no envió planta:</strong>
+                    <ul>
+                        {''.join([f"<li>Producto: {move.product_id.display_name}. Cantidad pedida: {move.product_uom_qty}</li>" for move in moves_not_in_list])}
                     </ul>
                 </li>
             </ul>
