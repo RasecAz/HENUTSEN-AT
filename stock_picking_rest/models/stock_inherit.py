@@ -71,6 +71,10 @@ class StockInherit(models.Model):
         string='Is executed',
         default=False
     )
+    is_backorder = fields.Boolean(
+        string='Is backorder',
+        default=False
+    )
 
 # ------------------------------------------------------------------------------------------------
 # METODOS
@@ -702,10 +706,13 @@ class StockInherit(models.Model):
         }
     
     def script_recompute_quantities(self):
+        if self.backorder_id:
+            self.is_backorder = True
+        if self.is_backorder:
+            return True
         if self.state == 'done':
-            raise UserError(_('La operación ya fue validada, no es posible recomputar las cantidades.'))
+            return True
         product_move_dict = []
-
         for move in self.move_ids:
             _logger.warning(move.product_id.name)
             for line in move.move_orig_ids:
