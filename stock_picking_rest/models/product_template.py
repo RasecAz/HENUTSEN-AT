@@ -15,11 +15,15 @@ class ProductTemplate(models.Model):
 # METHODS
 # --------------------------------------------------------------------------------
 
+    # Método que extiende de write para enviar el producto a Henutsen.
     def write (self, vals):
         product = super(ProductTemplate, self).write(vals)
         self.send_product_to_henutsen()
         return product
 
+    # Método para enviar el producto a Henutsen. Funciona similar a los demás
+    # métodos de envío de datos a Henutsen. Todos los casos se reportar en el
+    # log de odoo.
     def send_product_to_henutsen(self):
         self.ensure_one()
         config_params = self.get_config_params()
@@ -57,8 +61,7 @@ class ProductTemplate(models.Model):
                 _logger.warning(data)
                 _logger.warning(response.status_code)
             
-
-
+    # Método para obtener los parámetros de configuración desde el modelo config.henutsen
     def get_config_params(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
         if not config_params.api_key or not config_params.email_henutsen or not config_params.url_bearer or not config_params.url_picking or not config_params.url_packing:
@@ -80,6 +83,7 @@ class ProductTemplate(models.Model):
                 'bearer_token': bearer_token,
             }
 
+    # Método para obtener el bearer token en caso de que no se haya guardado en la configuración o esté vencido.
     def get_bearer(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
         if os.environ.get("ODOO_STAGE") == 'production':

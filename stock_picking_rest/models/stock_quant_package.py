@@ -4,7 +4,7 @@ class StockQuantPackage(models.Model):
     _inherit = 'stock.quant.package'
 
 # ------------------------------------------------------------------------------------------------
-# CAMPOS
+# FIELDS
 # ------------------------------------------------------------------------------------------------
 
     # INFO: Campo para indicar el peso total de la caja (Para el vale de entrega)

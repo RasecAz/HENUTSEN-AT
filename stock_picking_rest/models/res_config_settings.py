@@ -4,6 +4,10 @@ from odoo import api, fields, models, _
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+# --------------------------------------------------------------------------------
+# FIELDS
+# --------------------------------------------------------------------------------
+
     recieve_packing_from_henutsen = fields.Boolean(
         "Recieve Packing From Henutsen",
         help="If checked, the system will be able to recieve packing from Henutsen",
@@ -22,6 +26,11 @@ class ResConfigSettings(models.TransientModel):
         default=False
     )
 
+# --------------------------------------------------------------------------------
+# METHODS
+# --------------------------------------------------------------------------------
+
+    # INFO: Método para obtener los valores de la configuración
     @api.model
     def get_values(self):
         res = super(ResConfigSettings, self).get_values()
@@ -30,6 +39,7 @@ class ResConfigSettings(models.TransientModel):
         res['easy_import_pricelist'] = self.env['ir.config_parameter'].sudo().get_param('easy_import_pricelist')
         return res
 
+    # INFO: Método para guardar los valores de la configuración
     def set_values(self):
         super(ResConfigSettings, self).set_values()
         self.env['ir.config_parameter'].sudo().set_param('recieve_packing_from_henutsen', self.recieve_packing_from_henutsen)
