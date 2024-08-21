@@ -5,6 +5,10 @@ from odoo.tools import formatLang
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
+# --------------------------------------------------------------------------------
+# FIELDS
+# --------------------------------------------------------------------------------
+
     main_location_id = fields.Many2many(
         'stock.location',
         string = "Main location",
@@ -18,6 +22,11 @@ class PurchaseOrder(models.Model):
         compute = '_compute_update_buttons_visibility',
     )
 
+# --------------------------------------------------------------------------------
+# METHODS
+# --------------------------------------------------------------------------------
+
+    # INFO: Método para calcular los totales en la orden de compra
     @api.depends_context('lang')
     @api.depends('order_line.taxes_id', 'order_line.price_subtotal', 'amount_total', 'amount_untaxed')
     def _compute_tax_totals(self):
@@ -34,6 +43,8 @@ class PurchaseOrder(models.Model):
             order.tax_totals['formatted_amount_untaxed'] = formatLang(self.env, amount_total, currency_obj=order.currency_id or order.company_id.currency_id)
             order.amount_total = amount_total
     
+    # INFO: Método para calcular la ubicación principal de la orden de compra, 
+    # de esta manera, se evitan múltiples llamados a la base de datos.
     def compute_main_location_id(self):
         for record in self:
             main_company = record.company_id.parent_id.id or record.company_id.id
@@ -43,6 +54,9 @@ class PurchaseOrder(models.Model):
             record.main_location_id = [(6, 0, locations.ids)] if locations else [(5,)]            
             return locations
     
+    # INFO: Método para actualizar los botones de la vista de la orden de compra.
+    # TODO: Eliminar, tenía estos métodos en caso de que la actualización de
+    #       los valores se hiciera por medio de un accionador.
     @api.onchange('partner_id','order_line')
     def _compute_update_buttons_visibility(self):
         for order in self:
@@ -82,7 +96,9 @@ class PurchaseOrderLine(models.Model):
 # --------------------------------------------------------------------------------
 # METODOS
 # --------------------------------------------------------------------------------
-    # INFO: Método para calcular el precio en lista del producto (IMPORTANTE: la lista debe estar asociada a la sucursal de la compañía, más no a la compañía en sí)
+    # INFO: Método para calcular el precio en lista del producto (IMPORTANTE: la 
+    #       lista debe estar asociada a la sucursal de la compañía, más no a la 
+    #       compañía en sí)
     @api.depends('product_id', 'product_qty')
     def compute_price_in_pricelist(self):
         for line in self:
@@ -98,6 +114,9 @@ class PurchaseOrderLine(models.Model):
                 price_in_pricelist = 0
             line.price_in_pricelist = price_in_pricelist
     
+    # INFO: Método para calcular la cantidad de productos en stock en la bodega, este 
+    #       método es el que suele requerir más procesamiento, en caso de requerir
+    #       ajuste, revisar tiempos.
     @api.depends('product_id', 'product_qty')
     def compute_stock_lines(self, locations=False):
         if not locations:
@@ -117,12 +136,14 @@ class PurchaseOrderLine(models.Model):
             line.stock_in_warehouse = stock_quant
             self.onchange_product_qty()
 
+    # INFO: Método para calcular el total en línea de la orden de compra (cantidad * precio)
     @api.depends('product_qty', 'price_in_pricelist')
     def _compute_total_inline(self):
         for line in self:
             line.total_inline = line.product_qty * line.price_in_pricelist
             
-    # INFO: Método para validar que la cantidad de productos ingresados en la orden de compra, no sea mayor al stock en planta
+    # INFO: Método para generar el color de la línea de la orden de compra, en base
+    #       a la cantidad de productos en stock.
     def onchange_product_qty(self):
         for line in self:
             if line.product_qty > line.stock_in_warehouse:

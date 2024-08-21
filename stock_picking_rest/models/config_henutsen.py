@@ -160,6 +160,7 @@ class ConfigHenutsenWizard(models.Model):
             bearer_token = "Error " + str(response.status_code) + ". Response: " + response.text
         return bearer_token
     
+    # INFO: Método para generar el bearer token de QA
     def get_bearer_qa(self):
         if not self.api_key_qa or not self.email_henutsen_qa or not self.url_bearer_qa:
             raise ValidationError(_('Missing data to get the QA token'))
@@ -186,7 +187,7 @@ class ConfigHenutsenWizard(models.Model):
             bearer_token = "Error " + str(response.status_code) + ". Response: " + response.text
         return bearer_token
 
-    # INFO: Método que asigna los valores por defecto a los campos de la vista, al momento de ingresar
+    # INFO: Método que asigna los valores por defecto a los campos de la vista, al momento de ingresar a la vista.
     @api.model
     def default_get(self, fields_list):
         config = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
