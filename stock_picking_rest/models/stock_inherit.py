@@ -771,7 +771,9 @@ class StockInherit(models.Model):
             _logger.warning(move.product_id.name)
             for line in move.move_orig_ids:
                 _logger.warning(line.reference)
-        origin_move = next((move.move_orig_ids for move in self.move_ids if move.move_orig_ids and move.quantity != 0), False)
+        origin_move = next((move.move_orig_ids for move in self.move_ids if move.move_orig_ids and move.quantity != 0 and not move.picking_id.backorder_id), False)
+        if len(origin_move) > 1:
+            origin_move = origin_move.filtered(lambda x: x.picking_id.backorder_id == False) if origin_move else False
         origin_reference = origin_move.reference if origin_move else False
         _logger.warning(origin_reference)
         for move in self.move_ids:
