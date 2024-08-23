@@ -19,7 +19,7 @@
     # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Inventory',
-    'version': '17.0.2.35',
+    'version': '17.0.2.38',
 
     'depends': ['base','stock','contacts', 'sale', 'purchase'],
 
@@ -36,9 +36,11 @@
         'views/res_users_view.xml',
         'views/sale_order_view.xml',
         'views/product_template_view.xml',
-        'views/product_attribute_view.xml',
         'views/product_pricelist_view.xml',
         'views/stock_move_line_view.xml',
+
+        # Cron jobs
+        'data/product_attribute_cron.xml',
 
         # Wizards
         'wizards/product_pricelist_import_wizard_view.xml',

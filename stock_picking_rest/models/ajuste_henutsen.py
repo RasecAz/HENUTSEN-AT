@@ -8,7 +8,7 @@ class StockQuant(models.Model):
     _inherit = 'stock.quant'
 
 # --------------------------------------------------------------------------------
-# CAMPOS
+# FIELDS
 # --------------------------------------------------------------------------------
 
     id_ajuste = fields.Char(
@@ -17,7 +17,7 @@ class StockQuant(models.Model):
     )
 
 # --------------------------------------------------------------------------------
-# METODOS
+# METHODS
 # --------------------------------------------------------------------------------
 
     # INFO: Método que capta la información de los ajustes de tienda desde Henutsen y los asigna a la sección de ajustes de inventario en Odoo
@@ -135,7 +135,6 @@ class StockQuant(models.Model):
                     if response.status_code == 200:
                         pass
                     else:
-                        # english: 
                         raise ValidationError(_("Error sending information to Henutsen. Details: " + response.text))
             # Una vez que se haya enviado la información a Henutsen, se ajusta en Odoo y se limpia el campo de ID de ajuste 
             quant.id_ajuste = False
@@ -148,6 +147,7 @@ class StockQuant(models.Model):
         self.id_ajuste = False
         return res
     
+    # INFO: Método que obtiene los parámetros de configuración de Henutsen desde el modelo config.henutsen
     def get_config_params(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
         if not config_params.api_key or not config_params.email_henutsen or not config_params.url_bearer or not config_params.url_adjustment:
@@ -170,6 +170,7 @@ class StockQuant(models.Model):
                 'bearer_token': bearer_token,
             }
     
+    # INFO: Método que genera el token de autorización para enviar la información a Henutsen, en caso de requerirlo.
     def get_bearer(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
         if os.environ.get("ODOO_STAGE") == 'production':

@@ -8,6 +8,16 @@ _logger = logging.getLogger(__name__)
 class ProductAttribute(models.Model):
     _inherit = 'product.attribute'
 
+# --------------------------------------------------------------------------------
+# FIELDS
+# --------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------
+# METHODS
+# --------------------------------------------------------------------------------
+
+    # Método para enviar las variantes a Henutsen, este método se llama a partir de
+    # un cron programado en Odoo.
     def send_variants_to_henutsen(self):
         all_records = self.sudo().search([])
         attributes_json = []
@@ -41,6 +51,7 @@ class ProductAttribute(models.Model):
         else:
             _logger.info(_('Variants sent successfully'))
     
+    # Método para obtener los parámetros de configuración desde el modelo config.henutsen
     def get_config_params(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
         if not config_params.api_key or not config_params.email_henutsen or not config_params.url_bearer or not config_params.url_adjustment:
@@ -62,6 +73,7 @@ class ProductAttribute(models.Model):
                 'bearer_token': bearer_token,
             }
 
+    # Método para obtener el bearer token en caso de que no se haya guardado en la configuración o esté vencido.
     def get_bearer(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
         if os.environ.get("ODOO_STAGE") == 'production':

@@ -10,10 +10,31 @@ class ProductPricelistImport(models.TransientModel):
     _name = 'product.pricelist.import.wizard'
     _description = 'Product Pricelist Import'
 
-    file = fields.Binary('File', required=True)
-    file_name = fields.Char('File Name', required=True)
-    pricelist_id = fields.Many2one('product.pricelist', 'Pricelist', required=False)
+# --------------------------------------------------------------------------------
+# FIELDS
+# --------------------------------------------------------------------------------
 
+    file = fields.Binary(
+        'File', 
+        required=True
+    )
+    file_name = fields.Char(
+        'File Name', 
+        required=True
+    )
+    pricelist_id = fields.Many2one(
+        'product.pricelist', 'Pricelist', 
+        required=False
+    )
+
+# --------------------------------------------------------------------------------
+# METHODS
+# --------------------------------------------------------------------------------
+
+    # INFO: Método para importar la lista de precios desde un archivo Excel, el archivo
+    #       debe tener dos columnas, la primera con el código del producto y la segunda
+    #       con el precio del producto. El archivo debe ser un archivo Excel (.xlsx o .xls)
+    #       y debe tener el nombre de la lista de precios.
     def import_pricelist(self):
         self.ensure_one()
         if not self.pricelist_id:

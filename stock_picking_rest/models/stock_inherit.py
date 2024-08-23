@@ -83,7 +83,7 @@ class StockInherit(models.Model):
     # INFO: Metodo que setea la estructura del json dependiendo del tipo de movimiento
     def _create_debug_json(self):
 
-        #data_json corresponde a la estructura principal del json, mientras que product_list es la lista de los productos"""
+        #data_json corresponde a la estructura principal del json, mientras que product_list es la lista de los productos
         data_json_picking = {}
         product_list = []
         operation_name = self.name
@@ -138,6 +138,8 @@ class StockInherit(models.Model):
     # INFO: Método que genera el json a CG1 al validar la orden de salida
     def send_operation_to_cg1(self):
         if not self.is_executed:
+            # is_executed se utiliza para evitar que el método se ejecute más de una vez, ya que el request a CG1 tarda
+            # bastante en responder.
             self.is_executed = True
             cg1_detalle = {}
             especial_lista = []
@@ -153,6 +155,11 @@ class StockInherit(models.Model):
             items_lista = self.env['product.pricelist'].search([('name', '=', lista_precio)])
             nit_vendedor = str(self.location_id.company_id.vat)
             id_sucursal = self.partner_id.company_registry
+
+            # Se obtiene la lista de códigos de clientes especiales desde el modelo config.henutsen, luego se
+            # recorre la lista y se compara con el NIT del cliente actual, si el NIT del cliente actual se encuentra
+            # en la lista de códigos de clientes especiales, se asigna su NIT, de lo contrario, se asigna el NIT de
+            # Aristextil.
             especiales = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1).special_branch
             if especiales:
                 especial_lista = especiales.split(",")
@@ -167,7 +174,10 @@ class StockInherit(models.Model):
                 id_sucursal = "00"
                 nit_vendedor = str(self.sale_id.user_id.partner_id.vat)
 
-
+            # Se recorre cada producto de la operación y se crea un diccionario con la información necesaria para
+            # enviar a CG1, si el producto ya se encuentra en el diccionario, se suma la cantidad, de lo contrario, se
+            # crea una nueva entrada en el diccionario. El precio de los productos no debe contener decimales, por lo
+            # que se redondea el precio a un entero.
             for producto in self.move_ids:
                 referencia_producto = producto.product_id.default_code
                 cantidad_producto = producto.quantity
@@ -207,34 +217,40 @@ class StockInherit(models.Model):
 
             _logger.info(cg1_json)
             
+            # Se envía la información a CG1, si la respuesta es exitosa, se muestra un mensaje de éxito, de lo contrario,
+            # se muestra un mensaje de error. Dependiendo del error, se maneja el caso.
             response = requests.request("POST", service_url, headers=headers, data=cg1_json)
 
             try:
                 response_json = response.json()
+                # Si todo es correcto (el response es 200 y la respuesta contiene "ok"), se muestra un mensaje de éxito.
                 if response.status_code == 200 and "ok" in response_json:
-                    # trad: <h2>¡Envío a CG1 Exitoso!</h2> <p>Se ha enviado la información a CG1, consulte la información en el sistema.</p>
                     body_mensaje = Markup(_(f'<h2>CG1 Shipment Successful!</h2> <p>The information has been sent to CG1, check the information in the system.</p>'))
                     self.message_post(body=body_mensaje, message_type='notification')
                     self.rfid_response = "SUCCESS"
                     self.ribbon_visible = True
                     self.ribbon_error = False
                     self.response = response.text
+                # Si la respuesta contiene "error" o "detail", se muestra un mensaje de error.
                 elif "error" in response_json or "detail" in response_json:
                     self.rfid_response = _("FAILED. Error in the response request.")
                     self.ribbon_error = True
                     self.ribbon_visible = False
                     self.response = response.text
+                # Si la respuesta no contiene "ok", "error" o "detail", se muestra un mensaje de error desconocido.
                 else:
                     self.rfid_response = _("FAILED. Unknown error in the response request.")
                     self.ribbon_error = True
                     self.ribbon_visible = False
                     self.response = response.text
+            # Si hay un error al decodificar la respuesta, se muestra un mensaje de error.
             except json.JSONDecodeError:
                 self.rfid_response = _("FAILED. Error decoding the response.")
                 self.ribbon_error = True
                 self.ribbon_visible = False
                 self.response = response.text
 
+            # Se formatea el json generado para que sea más legible.
             cg1_json = json.dumps(cg1_json, indent=4)
 
             self.json_generado = cg1_json
@@ -243,7 +259,7 @@ class StockInherit(models.Model):
         
         return True
 
-    # INFO: Método que envía la información a la URL expuesta de Henutsen 
+    # INFO: Método que envía la información de picking a la URL expuesta de Henutsen
     def _picking_service(self):
         data_json = self._create_debug_json()
         config = self.get_config_params()
@@ -260,20 +276,20 @@ class StockInherit(models.Model):
         response = requests.request("POST",service_url, headers=headers, data=data_json)
 
         if response.status_code == 200:
-            # La solicitud fue exitosa, procesa la respuesta (json_response)
+            # La solicitud fue exitosa, procesa la respuesta.
             body_mensaje = Markup(_(f'<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information has been sent to Henutsen, start the labeling process.</p>'))
             self.message_post(body=body_mensaje, message_type='notification')
             self.rfid_response = "SUCCESS"
             self.response = response.text
         else:
-            # La solicitud falló, maneja el error
+            # Si la solicitud falla, el sistema tiene una segunda oportunidad de enviar la solicitud con un nuevo token.
             bearer_token = self.get_bearer()
             headers = {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + bearer_token
             }
             response = requests.request("POST",service_url, headers=headers, data=data_json)
-
+            # Se repite el llamado al servicio. En este caso, ya se manejan los casos de manera habitual.
             if response.status_code == 200:
                 body_mensaje = Markup(_(f'<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information has been sent to Henutsen, start the labeling process.</p>'))
                 self.message_post(body=body_mensaje, message_type='notification')
@@ -286,16 +302,21 @@ class StockInherit(models.Model):
                 self.response = response.text
     
     # INFO: Método que envía la información de picking a la URL expuesta de Henutsen
+    # TODO: Eliminar este método, se debe cambiar el nombre de método _picking_service a send_picking_to_henutsen
+    #      y revisar todos los llamados.
     def send_picking_to_henutsen(self):
         self._picking_service()  
 
     # INFO: Método que envía la información de packing a la URL expuesta de Henutsen
+    # TODO: Traducir los mensajes de éxito y error a inglés.
     def send_packing_to_henutsen(self):
         operation_name = self.name
         operacion_origen = self.location_id.company_id.name
         operacion_destino = self.partner_id.name
         box_order = []
         data_json_packing = {}
+        # Se recorre cada caja de la operación y se crea un diccionario con la información necesaria para
+        # enviar a Henutsen.
         for box_list in self.move_line_ids_without_package.mapped('result_package_id'):
             box_id = box_list.name
             product_list = []
@@ -335,7 +356,8 @@ class StockInherit(models.Model):
             "targetLocation": operacion_destino,
             "boxOrders": box_order
         })
-        # IMPORTANTE: Todo debe estar configurado en la vista de configuración de Henutsen para que el web service funcione correctamente. El programa es capaz de reconfigurarse si el token expira.
+        # IMPORTANTE: Todo debe estar configurado en la vista de configuración de Henutsen para que el web service 
+        # funcione correctamente. El programa es capaz de reconfigurarse si el token expira.
         self.json_generado = data_json_packing
         config = self.get_config_params()
         bearer_token = config['bearer_token']
@@ -351,14 +373,15 @@ class StockInherit(models.Model):
         response = requests.request("POST",service_url, headers=headers, data=data_json_packing)
 
         if response.status_code == 200:
-            # La solicitud fue exitosa, procesa la respuesta (json_response)
+            # La solicitud fue exitosa, procesa la respuesta
             success_message = _(f'<h2>¡Operation successfull!</h2> <p>Data has been send to Henutsen.</p>')
             body_mensaje = Markup(success_message)
             self.message_post(body=body_mensaje, message_type='notification')
             self.rfid_response = "SUCCESS"
             self.response = response.text
         else:
-            # La solicitud falló, maneja el error
+            # La solicitud falló, maneja el error de la misma manera que lo hace con el picking, generando un nuevo token
+            # y enviando la solicitud nuevamente.
             bearer_token = self.get_bearer()
             headers = {
                 'Content-Type': 'application/json',
@@ -416,7 +439,7 @@ class StockInherit(models.Model):
             record.packing_button_visible = es_packing and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS" and is_send_mode
             record.cg1_button_visible = es_salida and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and not record.ribbon_visible
 
-    # INFO: Método que calcula la cantidad total de productos en la orden de salida (Para el vale de entrega) 
+    # INFO: Método que calcula la cantidad total de productos en la orden de salida (Para el vale de entrega).
     @api.depends('state')
     def _compute_total_order(self):
         for record in self:
@@ -425,6 +448,7 @@ class StockInherit(models.Model):
                 total += product.quantity
             record.total_order = total
     
+    # INFO: Método que adquiere los parámetros de configuración de Henutsen, se llama en cada método que envía información.
     def get_config_params(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
         if not config_params.api_key or not config_params.email_henutsen or not config_params.url_bearer or not config_params.url_picking or not config_params.url_packing:
@@ -450,14 +474,20 @@ class StockInherit(models.Model):
                 'bearer_token': bearer_token,
             }
 
+    # INFO: Método que obtiene el token de Henutsen, se llama en cada método que envía información.
     def get_bearer(self):
         config_params = self.env['config.henutsen'].sudo().search([], order='id desc', limit=1)
         if os.environ.get("ODOO_STAGE") == 'production':
             return config_params.get_bearer()
         else:
             return config_params.get_bearer_qa()
-        
+    
+    # INFO: Método que se ejecuta al presionar el botón de validar la operación. Para este caso, se extiende su funcionalidad
+    #       para que, al validar una operación de salida, se realice la validación de la operación de packing más reciente y se
+    #       actualicen las cantidades de los productos en la operación de salida.
+    # TODO: Revisar cómo se puede buscar la operación más reciente para validar si no han sido validadas las operaciones anteriores.
     def button_validate(self):
+
         # origin_ids = self.move_ids.move_orig_ids if self.move_ids.move_orig_ids else False
         # if origin_ids and len(origin_ids) > 1:
         #     real_origin_id = self.env['stock.picking'].sudo().search([('name', '=', max(self.move_ids.move_orig_ids, key=lambda x: x.create_date).reference)], limit=1)
@@ -476,9 +506,12 @@ class StockInherit(models.Model):
                     else:
                         most_recent_move = record.move_ids.move_dest_ids.reference
                     context = self.env['stock.picking'].sudo().search([('name', '=', most_recent_move)], limit=1)
+                    # Este método recomputa las cantidades de los productos. Se llama bajo el contexto de la siguiente operación.
                     context.script_recompute_quantities()
         return res
     
+    # INFO: Método que consume Henutsen para crear las líneas de empaquetado en la operación de packing. Este tipo de funciones se
+    #       deben crear con el decorador @api.model para que puedan ser llamadas de manera externa.
     @api.model
     def send_packing(self, data):
         json_str = json.dumps(data)
@@ -492,6 +525,7 @@ class StockInherit(models.Model):
         if context.state == 'done':
             return {'error': _(f'The operation {context.name} has already been validated. It is not possible to perform the packing.')}
         boxes_list = []
+        # Se recorre cada caja de la operación y se crea un diccionario con la información necesaria para crear las líneas de empaquetado.
         for box_order in data['boxOrders']:
             product_list = []
             for product in box_order['productList'] if 'productList' in box_order else box_order['ProductList']:
@@ -524,16 +558,21 @@ class StockInherit(models.Model):
                     lote = self.env['stock.lot'].sudo().search([('name', '=', product['batchNumber']), ('product_id.id', '=', producto_variante.id), ('company_id.id', '=', context.company_id.id)])
                     if not lote:
                         return {'error': _(f"The batch {product['batchNumber']} was not found or doesnt exist. Check the value sent and try again.")}
+                # Nivel 2: lista de productos.
                 product_list.append({
                     'product_id': producto_variante,
                     'lot_id': lote,
                     'quantity': product['quantity']
                 })
+            # Nivel 1: lista de cajas.
             boxes_list.append({
                 'id': box_order['id'],
                 'weight': box_order['weight'] if 'weight' in box_order else 0.0,
                 'product_list': product_list
             })
+        # TODO: cambiar este try-except para que se maneje de manera más específica, dejarlos de esta manera no es
+        #       una buena práctica.
+        #       Adicional, cambiar los mensajes de éxito y error a inglés.
         try:
             for move in context.move_ids:
                 move.move_line_ids.sudo().unlink()
@@ -582,10 +621,15 @@ class StockInherit(models.Model):
         except ValidationError as e:
             return {'error': _(f'Error creating the packing. Details: {e}. Try again.')}
     
+    # INFO: Método que consume Henutsen para enviar la recepción de la orden en tienda. Este tipo de funciones se
+    #       deben crear con el decorador @api.model para que puedan ser llamadas de manera externa.
+    # TODO: Cambiar los mensajes de éxito y error a inglés.
     @api.model
     def receive_order(self, data):
         json_str = json.dumps(data)
         _logger.info(json_str)
+        # Se traen dos contextos, uno corresponde a la operación de recepción y el otro a la operación de despacho. Se requiere
+        # la operación de despacho para obtener los lotes de los productos que no tienen lote en la operación de recepción.
         context = self.env['stock.picking'].sudo().search([('purchase_id.partner_ref', '=', data['consecutive']),('picking_type_id.sequence_code', '=', 'IN')], limit=1)
         context_warehouse = self.env['stock.picking'].sudo().search([('origin', '=', data['consecutive']), ('picking_type_id.sequence_code', '=', 'OUT')], limit=1)
         if not context:
@@ -593,6 +637,7 @@ class StockInherit(models.Model):
         if context.state == 'done':
             return {'error': _(f'The operation {context.name} has already been validated. It is not possible to perform the reception.')}
         product_list = []
+        # Se recorre cada producto de la operación y se crea un diccionario con la información necesaria para la recepción.
         for product in data['productList']:
             productos = self.env['product.product'].sudo().search([('default_code', '=', product['productSku'].rstrip())])
             if len(productos) > 1 and 'variantList' not in product or len(productos) > 1 and product['variantList'] == []:
@@ -653,8 +698,11 @@ class StockInherit(models.Model):
                 move_line.lot_name = product['lot_id']
             else:
                 return {'error': _(f"Product {product['product_id'].name} not found in the operation. Check the product and try again.")}
+        # Se valida que el campo 'complete' sea un booleano y que sea verdadero, si es así, se valida la operación automáticamente.
         if isinstance(data['complete'], bool) and data['complete']:
             context.rfid_response = "COMPLETE"
+            # move_not_in_list es una lista de productos que no se encuentran en la lista de productos enviados por planta, en caso de que
+            # existan productos en esta lista, se envía un mensaje de notificación al usuario notificando los productos que no se enviaron.
             if moves_not_in_list:
                 body_mensaje = Markup(
                     _(f'''
@@ -675,6 +723,7 @@ class StockInherit(models.Model):
                     '''
                 ))
             context.message_post(body=body_mensaje, message_type='notification')
+            # Se eliminan de la orden los productos que no llegaron a tienda y se valida la operación.
             moves_not_in_list.unlink()
             super(StockInherit, context).button_validate()
             return {
@@ -705,6 +754,11 @@ class StockInherit(models.Model):
             'success': _(f'Missing Products reported in operation {context.name}!'),
         }
     
+    # INFO: Método que recomputa las cantidades de los productos en las operaciones de recolección:
+    #       - Si la operación es de tipo PICK, se recomputan según la demanda.
+    #       - Si la operación tiene origen (no es picking), se recomputan según la operación anterior.
+    #       - Si la operación ya fue validada o es una backorder, no se recomputan las cantidades.
+    #       Para el segundo caso, se eliminan las líneas de la operación y se crean nuevas líneas con las cantidades de la operación anterior.
     def script_recompute_quantities(self):
         if self.backorder_id:
             self.is_backorder = True
@@ -718,6 +772,10 @@ class StockInherit(models.Model):
             for line in move.move_orig_ids:
                 _logger.warning(line.reference)
         origin_move = next((move.move_orig_ids for move in self.move_ids if move.move_orig_ids and move.quantity != 0), False)
+        if len(origin_move) > 1:
+            origin = [move for move in origin_move if not move.picking_id.backorder_id]
+            origin_move = origin[0]
+            _logger.warning(origin_move)
         origin_reference = origin_move.reference if origin_move else False
         _logger.warning(origin_reference)
         for move in self.move_ids:
@@ -761,11 +819,25 @@ class StockInherit(models.Model):
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
+# ----------------------------------------------------------
+# FIELDS
+# ----------------------------------------------------------
+
+# ----------------------------------------------------------
+# METHODS
+# ----------------------------------------------------------
+
+    # INFO: Este método no permite registrar más unidades de las demandadas. Por lo
+    #       que se extiende para que no se maneje el error y en su lugar, sólo retorne.
     def _set_product_qty(self):
         return True
 
 class StockMoveLine(models.Model):
     _inherit = 'stock.move.line'
+
+# ----------------------------------------------------------
+# FIELDS
+# ----------------------------------------------------------
 
     default_code_integer = fields.Integer(
         'Default Code Integer', 
@@ -773,6 +845,12 @@ class StockMoveLine(models.Model):
         store=True
     )
 
+# ----------------------------------------------------------
+# METHODS
+# ----------------------------------------------------------
+
+    # INFO: Método que transforma el código de producto a un entero para poder ordenar
+    #       los productos de manera correcta en los reportes y operaciones detalladas.
     @api.depends('product_id.default_code')
     def _compute_default_code_integer(self):
         for record in self:
