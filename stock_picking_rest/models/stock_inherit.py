@@ -507,7 +507,7 @@ class StockInherit(models.Model):
                         most_recent_move = record.move_ids.move_dest_ids.reference
                     context = self.env['stock.picking'].sudo().search([('name', '=', most_recent_move)], limit=1)
                     # Este método recomputa las cantidades de los productos. Se llama bajo el contexto de la siguiente operación.
-                    context.script_recompute_quantities()
+                    context.script_recompute_quantities(origin_reference=record.name)
         return res
     
     # INFO: Método que consume Henutsen para crear las líneas de empaquetado en la operación de packing. Este tipo de funciones se
@@ -759,24 +759,28 @@ class StockInherit(models.Model):
     #       - Si la operación tiene origen (no es picking), se recomputan según la operación anterior.
     #       - Si la operación ya fue validada o es una backorder, no se recomputan las cantidades.
     #       Para el segundo caso, se eliminan las líneas de la operación y se crean nuevas líneas con las cantidades de la operación anterior.
-    def script_recompute_quantities(self):
+    def script_recompute_quantities(self, origin_reference=False):
         if self.backorder_id:
             self.is_backorder = True
-        if self.is_backorder:
-            return True
         if self.state == 'done':
             return True
         product_move_dict = []
-        for move in self.move_ids:
-            _logger.warning(move.product_id.name)
-            for line in move.move_orig_ids:
-                _logger.warning(line.reference)
-        origin_move = next((move.move_orig_ids for move in self.move_ids if move.move_orig_ids and move.quantity != 0), False)
-        if len(origin_move) > 1:
-            origin = [move for move in origin_move if not move.picking_id.backorder_id]
-            origin_move = origin[0]
-            _logger.warning(origin_move)
-        origin_reference = origin_move.reference if origin_move else False
+        # for move in self.move_ids:
+        #     _logger.warning(move.product_id.name)
+        #     if move.move_orig_ids:
+        #         if len(move.move_orig_ids) == 1 and move.move_orig_ids.picking_id.backorder_id:
+        #             continue
+        #         else:
+        #             origin_move = move.move_orig_ids
+        #             break
+        # origin_move = next((move.move_orig_ids for move in self.move_ids if move.move_orig_ids and move.quantity != 0), False)
+        # if len(origin_move) > 1:
+        #     for move in origin_move:
+        #         _logger.warning(move.picking_id)
+        #     origin = [move for move in origin_move if not move.picking_id.backorder_id]
+        #     origin_move = origin[0]
+        #     _logger.warning(origin_move)
+        # origin_reference = origin_move.reference if origin_move else False
         _logger.warning(origin_reference)
         for move in self.move_ids:
             product_id = move.product_id.id
@@ -785,9 +789,11 @@ class StockInherit(models.Model):
                 move.move_line_ids.unlink()
             else:
                 product_move_dict.append(product_id)
-                if not origin_move or self.picking_type_id.sequence_code == 'PICK':
+                if not origin_reference or self.picking_type_id.sequence_code == 'PICK':
                     move.quantity = move.product_uom_qty
                 else:
+                    if self.is_backorder:
+                            return True
                     if len(move.move_orig_ids) > 1:                      
                         most_recent_move = move.move_orig_ids.filtered(lambda x: x.reference == origin_reference)
                     else:
