@@ -435,8 +435,8 @@ class StockInherit(models.Model):
             if record.picking_type_id.sequence_code == "OUT":
                 es_salida = True
 
-            record.send_button_visible = es_picking and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS"
-            record.packing_button_visible = es_packing and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and es_sucursal and self.rfid_response != "SUCCESS" and is_send_mode
+            record.send_button_visible = es_picking and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS"
+            record.packing_button_visible = es_packing and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and is_send_mode
             record.cg1_button_visible = es_salida and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and not record.ribbon_visible
 
     # INFO: Método que calcula la cantidad total de productos en la orden de salida (Para el vale de entrega).
