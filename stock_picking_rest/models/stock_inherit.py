@@ -435,8 +435,8 @@ class StockInherit(models.Model):
             if record.picking_type_id.sequence_code == "OUT":
                 es_salida = True
 
-            record.send_button_visible = es_picking and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS"
-            record.packing_button_visible = es_packing and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and is_send_mode
+            record.send_button_visible = es_picking and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and es_sucursal
+            record.packing_button_visible = es_packing and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and is_send_mode and es_sucursal
             record.cg1_button_visible = es_salida and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and not record.ribbon_visible
 
     # INFO: Método que calcula la cantidad total de productos en la orden de salida (Para el vale de entrega).
@@ -696,8 +696,32 @@ class StockInherit(models.Model):
             if move_line:
                 move_line.quantity = product['quantity'] - product['missing_quantity']
                 move_line.lot_name = product['lot_id']
-            else:
-                return {'error': _(f"Product {product['product_id'].name} not found in the operation. Check the product and try again.")}
+            elif not move_context or not move_line:
+                new_move_line = {
+                    'product_id': product['product_id'].id,  # Reemplaza product_id con el ID del producto deseado
+                    'name': product['product_id'].display_name,
+                    'quantity': product['quantity'] - product['missing_quantity'],
+                    'product_uom_qty': product['quantity'],
+                    # 'lot_name': product['lot_id'],
+                    'location_id': context.location_id.id,
+                    'location_dest_id': context.location_dest_id.id,
+                    'picking_id': context.id,
+                    'company_id': context.company_id.id
+                    # 'picking_id': context.id,
+                    # 'product_id': product['product_id'].id,
+                    # 'location_dest_id': context.location_dest_id.id,
+                    # 'location_id': context.location_id.id,
+                    # 'lot_name': product['lot_id'],
+                    # 'quantity': product['quantity'] - product['missing_quantity'],
+                    # 'product_uom_id': product['product_id'].uom_id.id,
+                    # 'quantity_product_uom': product['quantity'],
+                    # 'company_id': context.company_id.id
+                }
+                if not move_context:
+                    move_context = context.move_ids.create(new_move_line)
+    
+                # context.update(move_context)
+                
         # Se valida que el campo 'complete' sea un booleano y que sea verdadero, si es así, se valida la operación automáticamente.
         if isinstance(data['complete'], bool) and data['complete']:
             context.rfid_response = "COMPLETE"
