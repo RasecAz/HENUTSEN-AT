@@ -29,6 +29,12 @@
         </template>
         <!-- Template que hereda del reporte de vale de entrega y agrega el total de productos (Para el caso en que no se haya empaquetado) -->
         <template id="stock_move_table_inherit" inherit_id="stock.report_delivery_document">
+            <xpath expr="//table[@name='stock_move_line_table']/t[1]" position="attributes">
+                <attribute name="t-value">True</attribute>
+            </xpath>
+            <xpath expr="//table[@name='stock_move_line_table']/t[2]" position="replace">
+                <t t-set="has_serial_number" t-value="True"/>
+            </xpath>                
             <xpath expr="//table[@name='stock_move_table']/tbody" position="after">
                     <tfoot>
                         <tr t-att-class="'bg-300 fw-bold o_line_section'">
