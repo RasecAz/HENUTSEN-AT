@@ -178,6 +178,7 @@ class StockInherit(models.Model):
             # enviar a CG1, si el producto ya se encuentra en el diccionario, se suma la cantidad, de lo contrario, se
             # crea una nueva entrada en el diccionario. El precio de los productos no debe contener decimales, por lo
             # que se redondea el precio a un entero.
+            products_without_price = []
             for producto in self.move_ids:
                 referencia_producto = producto.product_id.default_code
                 cantidad_producto = producto.quantity
@@ -185,8 +186,8 @@ class StockInherit(models.Model):
                 for item in items_lista.item_ids:
                     if item.product_tmpl_id.name == producto.product_id.name:
                         precio_producto = int(round(item.fixed_price))
-                if not precio_producto:
-                    precio_producto = 0
+                if not precio_producto or precio_producto == 0:
+                    products_without_price.append(producto.product_id.display_name)
                 if cantidad_producto != 0:
                     if referencia_producto in cg1_detalle:
                         suma = float(cg1_detalle[referencia_producto]["CMPETRM_CANT_PED_1"]) + cantidad_producto
@@ -204,6 +205,8 @@ class StockInherit(models.Model):
                             "CMPETRM_VENDEDOR": nit_vendedor.split("-")[0],
                             "CMPETRM_MOTIVO": "01"
                         }
+            if products_without_price:
+                raise ValidationError(_(f'The following products do not have a price in the price list:\n- ' + '\n- '.join(products_without_price)))
             cg1_json = json.dumps({
                 "CMPETRM_OC_NRO": self.name.replace(prefijo, "", 1),
                 "CMPETRM_IND_CLI": 2,
