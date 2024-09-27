@@ -6,9 +6,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-07-19 22:56+0000\n"
-"PO-Revision-Date: 2024-07-19 17:58-0500\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2024-09-27 03:08+0000\n"
+"PO-Revision-Date: 2024-09-26 22:10-0500\n"
+"Last-Translator: Wilson Contreras\n"
 "Language-Team: \n"
 "Language: es_CO\n"
 "MIME-Version: 1.0\n"
@@ -156,6 +156,11 @@ msgstr "Creado por"
 #: model:ir.model.fields,field_description:stock_picking_rest.field_product_pricelist_import_wizard__create_date
 msgid "Created on"
 msgstr "Creado"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_move_line__default_code_integer
+msgid "Default Code Integer"
+msgstr "Referencia entero"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__display_name
@@ -343,6 +348,11 @@ msgid "Internal refrerence: The value can't be empty and must not contain specia
 msgstr "Referencia interna: El valor no puede estar vacío y no debe contener caracteres especiales"
 
 #. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__is_backorder
+msgid "Is backorder"
+msgstr "Es backorder"
+
+#. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_stock_picking__is_executed
 msgid "Is executed"
 msgstr "Fue ejecutado"
@@ -478,7 +488,12 @@ msgstr "Producto"
 #. module: stock_picking_rest
 #: model:ir.model,name:stock_picking_rest.model_product_attribute
 msgid "Product Attribute"
-msgstr "Atributo del Producto"
+msgstr "Atributo de producto"
+
+#. module: stock_picking_rest
+#: model:ir.model,name:stock_picking_rest.model_stock_move_line
+msgid "Product Moves (Stock Move Line)"
+msgstr "Movimientos de producto (línea de movimiento de inventario)"
 
 #. module: stock_picking_rest
 #: model:ir.model,name:stock_picking_rest.model_product_pricelist_import_wizard
@@ -488,7 +503,7 @@ msgstr "Importación de precio de producto en lista"
 #. module: stock_picking_rest
 #: model:ir.model,name:stock_picking_rest.model_product_product
 msgid "Product Variant"
-msgstr "Variantes de producto"
+msgstr "Variante del producto"
 
 #. module: stock_picking_rest
 #. odoo-python
@@ -515,7 +530,7 @@ msgstr "Línea de Orden de Compra"
 #. module: stock_picking_rest
 #: model:ir.model,name:stock_picking_rest.model_stock_quant
 msgid "Quants"
-msgstr "Cants"
+msgstr "Cantidades"
 
 #. module: stock_picking_rest
 #: model_terms:ir.ui.view,arch_db:stock_picking_rest.res_config_inherit_stock
@@ -678,6 +693,19 @@ msgstr ""
 
 #. module: stock_picking_rest
 #. odoo-python
+#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#, python-format
+msgid ""
+"The following products do not have a price in the price list:\n"
+"- \n"
+"- "
+msgstr ""
+"Los siguientes productos no tienen precio en la lista de precios:\n"
+"- \n"
+"- "
+
+#. module: stock_picking_rest
+#. odoo-python
 #: code:addons/stock_picking_rest/wizards/product_pricelist_import_wizard.py:0
 #, python-format
 msgid "This file does not correspond to the selected pricelist."
@@ -799,6 +827,11 @@ msgid "User"
 msgstr "Usuario"
 
 #. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Validado Henutsen"
+msgstr ""
+
+#. module: stock_picking_rest
 #. odoo-python
 #: code:addons/stock_picking_rest/models/product_attribute.py:0
 #, python-format
@@ -829,6 +862,11 @@ msgstr "en cero"
 #: model:ir.model.fields.selection,name:stock_picking_rest.selection__purchase_order_line__stock_state__not_available
 msgid "not avaliable"
 msgstr "no disponible"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields.selection,name:stock_picking_rest.selection__purchase_order_line__stock_state__not_calculated
+msgid "not calculated"
+msgstr "no calculado"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_res_users__is_approve_user
