@@ -70,3 +70,4 @@ class SaleOrder(models.Model):
     def _can_be_confirmed(self):
         self.ensure_one()
         return self.state in {'draft', 'sent', 'pending'}
+    

@@ -63,6 +63,7 @@ class PurchaseOrder(models.Model):
             order.update_buttons_visibility = False
             if order.partner_id and order.order_line:
                 order.update_buttons_visibility = True
+    
 
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
@@ -113,6 +114,7 @@ class PurchaseOrderLine(models.Model):
             if not price_in_pricelist:
                 price_in_pricelist = 0
             line.price_in_pricelist = price_in_pricelist
+            line.price_unit = price_in_pricelist
     
     # INFO: Método para calcular la cantidad de productos en stock en la bodega, este 
     #       método es el que suele requerir más procesamiento, en caso de requerir
@@ -141,6 +143,7 @@ class PurchaseOrderLine(models.Model):
     def _compute_total_inline(self):
         for line in self:
             line.total_inline = line.product_qty * line.price_in_pricelist
+            line.price_subtotal = line.total_inline
             
     # INFO: Método para generar el color de la línea de la orden de compra, en base
     #       a la cantidad de productos en stock.
