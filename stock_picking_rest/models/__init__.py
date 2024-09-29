@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from . import stock_inherit
+from . import stock_picking
 from . import ajuste_henutsen
 from . import stock_quant_package
 from . import config_henutsen

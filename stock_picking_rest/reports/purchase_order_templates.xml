@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <template id="purchase_order_templates_inherit" inherit_id="purchase.purchase_order_templates">
+            <xpath expr="//table[@class='table table-sm o_main_table table-borderless mt-4']/thead/tr" position="replace">
+                <tr>
+                    <th name="th_description"><strong>Product</strong></th>
+                    <th name="th_taxes"><strong>Taxes</strong></th>
+                    <th name="th_date_req" class="text-center"><strong>Date Req.</strong></th>
+                    <th name="th_quantity" class="text-end"><strong>Qty</strong></th>
+                    <th name="th_price_unit" class="text-end"><strong>Price in Pricelist</strong></th>
+                    <th name="th_subtotal" class="text-end">
+                        <strong>Subtotal</strong>
+                    </th>
+                </tr>
+            </xpath>
+            <xpath expr="//td[strong[contains(text(), 'Untaxed Amount')]]/.." position="replace"/>
+        </template>
+    </data>
+</odoo>

@@ -24,6 +24,9 @@
                 <xpath expr="//header/button[@name='action_cancel']" position="attributes">
                     <attribute name="invisible">state not in ['draft', 'sent', 'sale', 'pending'] or not id or locked</attribute>
                 </xpath>
+                <xpath expr="//group[@name='order_details']/div[@groups='product.group_product_pricelist']/button" position="attributes">
+                    <attribute name="invisible">not pricelist_id</attribute>
+                </xpath>
             </field>
         </record>
     </data>

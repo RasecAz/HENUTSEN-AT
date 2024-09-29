@@ -39,11 +39,23 @@
                 <field name="packing_button_visible" invisible="1"/>
                 <button name="send_picking_to_henutsen" invisible="not send_button_visible" string="Generate RFID codes in Henutsen" type="object" class="oe_highlight"/>
                 <button name="send_operation_to_cg1" invisible="not cg1_button_visible" string="Send to CG1" type="object" class="oe_highlight"/>
-                <!-- Enviar a verificación RFID Henutsen -->
                 <button name="send_packing_to_henutsen" invisible="not packing_button_visible" string="Send to RFID Verification" type="object" class="oe_highlight"/>
             </xpath>
             <xpath expr="//group[@name='other_infos']" position="inside">
                 <field name="total_order" />
+            </xpath>
+            <xpath expr="//sheet/notebook/page[@name='operations']/field[@name='move_ids_without_package']/tree/field[@name='product_uom'][2]" position="after">
+                <field name="price_in_pricelist" readonly="1"/>
+                <field name="total_amount" readonly="1" />
+            </xpath>
+            <xpath expr="//field[@name='origin']" position="replace">
+                <field name="sale_id" invisible="1" />
+                <field name="move_ids" invisible="1"/>
+                <label for="origin" string="Origin Document" />
+                <div name="origin_sale_order" class="o_row">
+                    <field name="origin" placeholder="e.g. PO0032" readonly="state in ['cancel', 'done']"/>
+                    <button name="action_compute_price_in_pricelist" type="object" string="Update prices" help="Recompute all prices based on this pricelist" class="btn-link mb-1 px-0" icon="fa-refresh" confirm="This will update the unit price of all products based on the pricelist." invisible="not move_ids or not sale_id"/>
+                </div>
             </xpath>
         </field>
     </record>
