@@ -5,6 +5,23 @@
         <xpath expr="//table[1]/tbody/tr" position="attributes">
             <attribute name="t-foreach">o.move_line_ids_without_package.sorted(lambda ml: (int(ml.product_id.default_code) if ml.product_id.default_code.isdigit() else ml.product_id.default_code, ml.id))</attribute>
         </xpath>
+        <xpath expr="//table[@t-if='o.move_line_ids and o.move_ids_without_package']/thead/tr" position="inside">
+            <th name="th_price_in_pricelist" class="text-end">
+                <strong>Price in Pricelist</strong>
+            </th>
+            <th name="th_total_amount" class="text-end">
+                <strong>Total Amount</strong>
+            </th>
+        </xpath>
+        <!-- Agregar los nuevos campos en las filas -->
+        <xpath expr="//table[@t-if='o.move_line_ids and o.move_ids_without_package']/tbody/tr" position="inside">
+            <td class="text-end">
+                <span t-field="ml.price_in_pricelist"/>
+            </td>
+            <td class="text-end">
+                <span t-field="ml.total_amount"/>
+            </td>
+        </xpath>
     </template>
 
 </odoo>

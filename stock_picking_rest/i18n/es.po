@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-27 03:08+0000\n"
-"PO-Revision-Date: 2024-09-26 22:10-0500\n"
+"POT-Creation-Date: 2024-09-29 05:12+0000\n"
+"PO-Revision-Date: 2024-09-29 00:14-0500\n"
 "Last-Translator: Wilson Contreras\n"
 "Language-Team: \n"
 "Language: es\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #. module: stock_picking_rest
 #. odoo-python
-#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#: code:addons/stock_picking_rest/models/stock_picking.py:0
 #, python-format
 msgid ""
 "<h2>CG1 Shipment Successful!</h2> <p>The information has been sent to CG1, check the information "
@@ -30,21 +30,21 @@ msgstr ""
 
 #. module: stock_picking_rest
 #. odoo-python
-#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#: code:addons/stock_picking_rest/models/stock_picking.py:0
 #, python-format
 msgid "<h2>¡Operación Exitosa!</h2> <p>La información ha sido enviada a Henutsen.</p>"
 msgstr ""
 
 #. module: stock_picking_rest
 #. odoo-python
-#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#: code:addons/stock_picking_rest/models/stock_picking.py:0
 #, python-format
 msgid "<h2>¡Operation successfull!</h2> <p>Data has been send to Henutsen.</p>"
 msgstr "<h2>¡Operación realizada con éxito!</h2> <p>Los datos han sido enviados a Henutsen.</p>"
 
 #. module: stock_picking_rest
 #. odoo-python
-#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#: code:addons/stock_picking_rest/models/stock_picking.py:0
 #, python-format
 msgid ""
 "<h2>¡RFID code generation in Henutsen successful!</h2> <p>The information has been sent to "
@@ -69,6 +69,16 @@ msgstr "<span>Productos Totales</span>"
 #: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_move_table_inherit
 msgid "<span>Units</span>"
 msgstr "<span>Unidades</span>"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.report_picking_inherit
+msgid "<strong>Price in Pricelist</strong>"
+msgstr "<strong>Precio Unitario</strong>"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.report_picking_inherit
+msgid "<strong>Total Amount</strong>"
+msgstr "<strong>Importe total</strong>"
 
 #. module: stock_picking_rest
 #: model:ir.ui.menu,name:stock_picking_rest.config_api_menu
@@ -158,6 +168,12 @@ msgid "Created on"
 msgstr "Creado"
 
 #. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_move__currency_id
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_move_line__currency_id
+msgid "Currency"
+msgstr "Divisa"
+
+#. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_stock_move_line__default_code_integer
 msgid "Default Code Integer"
 msgstr "Referencia entero"
@@ -217,21 +233,21 @@ msgstr ""
 
 #. module: stock_picking_rest
 #. odoo-python
-#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#: code:addons/stock_picking_rest/models/stock_picking.py:0
 #, python-format
 msgid "FAILED. Error decoding the response."
 msgstr "FAILED. Error en la codificación del response."
 
 #. module: stock_picking_rest
 #. odoo-python
-#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#: code:addons/stock_picking_rest/models/stock_picking.py:0
 #, python-format
 msgid "FAILED. Error in the response request."
 msgstr "FAILED. Error en la respuesta del servicio."
 
 #. module: stock_picking_rest
 #. odoo-python
-#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#: code:addons/stock_picking_rest/models/stock_picking.py:0
 #, python-format
 msgid "FAILED. Unknown error in the response request."
 msgstr "FAILED. Error desconocido en la respuesta del servicio."
@@ -394,7 +410,7 @@ msgstr "Ubicación principal"
 #. module: stock_picking_rest
 #. odoo-python
 #: code:addons/stock_picking_rest/models/product_template.py:0
-#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#: code:addons/stock_picking_rest/models/stock_picking.py:0
 #, python-format
 msgid ""
 "Missing data in Henutsen configuration, validate that all fields are complete, if you do not have "
@@ -440,6 +456,11 @@ msgid "Name Rtrim"
 msgstr "Nombre Rtrim"
 
 #. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Origin Document"
+msgstr "Documento Origen"
+
+#. module: stock_picking_rest
 #: model:ir.model,name:stock_picking_rest.model_stock_quant_package
 msgid "Packages"
 msgstr "Paquetes"
@@ -461,6 +482,8 @@ msgstr "Aprobación pendiente"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order_line__price_in_pricelist
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_move__price_in_pricelist
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_move_line__price_in_pricelist
 msgid "Price in pricelist"
 msgstr "Precio en lista"
 
@@ -540,6 +563,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock_picking_rest.field_res_config_settings__recieve_packing_from_henutsen
 msgid "Recieve Packing From Henutsen"
 msgstr "Recibir Packing desde Henutsen"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Recompute all prices based on this pricelist"
+msgstr "Recalcular todos los precios basándose en esta lista de precios"
 
 #. module: stock_picking_rest
 #: model_terms:ir.ui.view,arch_db:stock_picking_rest.config_henutsen_form_view
@@ -687,7 +715,7 @@ msgstr ""
 
 #. module: stock_picking_rest
 #. odoo-python
-#: code:addons/stock_picking_rest/models/stock_inherit.py:0
+#: code:addons/stock_picking_rest/models/stock_picking.py:0
 #, python-format
 msgid ""
 "The following products do not have a price in the price list:\n"
@@ -704,6 +732,17 @@ msgstr ""
 #, python-format
 msgid "This file does not correspond to the selected pricelist."
 msgstr "Este archivo no corresponde a la lista de precios seleccionada."
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "This will update the unit price of all products based on the pricelist."
+msgstr "Esto actualizará los precios unitarios de todos los productos, basado en la lista de precios"
+
+#. module: stock_picking_rest
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_move__total_amount
+#: model:ir.model.fields,field_description:stock_picking_rest.field_stock_move_line__total_amount
+msgid "Total amount"
+msgstr "Importe total"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order_line__total_inline
@@ -729,6 +768,11 @@ msgstr "Transferir "
 #: model:ir.model.fields,field_description:stock_picking_rest.field_purchase_order__update_buttons_visibility
 msgid "Update buttons visibility"
 msgstr "Actualizar la visibilidad de los botones"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "Update prices"
+msgstr "Actualizar precios"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields,field_description:stock_picking_rest.field_config_henutsen__url_bearer
@@ -831,6 +875,11 @@ msgstr "Envío Errado"
 #: model:ir.model.fields.selection,name:stock_picking_rest.selection__purchase_order_line__stock_state__available
 msgid "avaliable"
 msgstr "disponible"
+
+#. module: stock_picking_rest
+#: model_terms:ir.ui.view,arch_db:stock_picking_rest.stock_picking_inherit
+msgid "e.g. PO0032"
+msgstr "Por ejemplo PO0032"
 
 #. module: stock_picking_rest
 #: model:ir.model.fields.selection,name:stock_picking_rest.selection__purchase_order_line__stock_state__in_zero

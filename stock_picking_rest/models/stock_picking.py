@@ -11,7 +11,7 @@ from markupsafe import Markup
 from odoo.exceptions import ValidationError, UserError
 from datetime import datetime
 
-class StockInherit(models.Model):
+class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
 # ------------------------------------------------------------------------------------------------
@@ -134,6 +134,7 @@ class StockInherit(models.Model):
             "productList": product_list
             })
         return data_json_picking
+    
 
     # INFO: Método que genera el json a CG1 al validar la orden de salida
     def send_operation_to_cg1(self):
@@ -498,7 +499,7 @@ class StockInherit(models.Model):
         #     real_origin_id = origin_ids
         # if real_origin_id and real_origin_id.state != 'done':
         #     raise UserError(_('La operación anterior (%s) no ha sido validada aún.', real_origin_id.name))
-        res = super(StockInherit, self).button_validate()
+        res = super(StockPicking, self).button_validate()
         for record in self:
             if record.picking_type_id.sequence_code == "OUT":
                 pass
@@ -752,7 +753,7 @@ class StockInherit(models.Model):
             context.message_post(body=body_mensaje, message_type='notification')
             # Se eliminan de la orden los productos que no llegaron a tienda y se valida la operación.
             moves_not_in_list.unlink()
-            super(StockInherit, context).button_validate()
+            super(StockPicking, context).button_validate()
             return {
                 'success': _(f'Order reception without missings, complete for operation {context.name}!')
             }
@@ -846,7 +847,16 @@ class StockInherit(models.Model):
                                 'location_dest_id': move.location_dest_id.id,
                             })
 
-        return True        
+        return True   
+
+    def action_compute_price_in_pricelist(self):
+        for record in self:
+            price_in_pricelist = record.sale_id.pricelist_id.name
+            items_lista = self.env['product.pricelist'].search([('name', '=', price_in_pricelist)], limit=1) if price_in_pricelist else False
+            for line in record.move_line_ids_without_package:
+                line.compute_price_in_pricelist(items_lista)
+            for move in record.move_ids:
+                move.compute_price_in_pricelist(items_lista) 
 
 
 class StockMove(models.Model):
@@ -855,7 +865,18 @@ class StockMove(models.Model):
 # ----------------------------------------------------------
 # FIELDS
 # ----------------------------------------------------------
-
+    price_in_pricelist = fields.Monetary(
+        string = "Price in pricelist",
+    )
+    total_amount = fields.Monetary(
+        string = "Total amount",
+    )
+    currency_id = fields.Many2one(
+        'res.currency',
+        related = 'picking_id.sale_id.currency_id',
+        string = 'Currency',
+        store = True
+    )
 # ----------------------------------------------------------
 # METHODS
 # ----------------------------------------------------------
@@ -864,6 +885,18 @@ class StockMove(models.Model):
     #       que se extiende para que no se maneje el error y en su lugar, sólo retorne.
     def _set_product_qty(self):
         return True
+    
+    # INFO: Método que calcula el precio en la lista de precios y el monto total de cada línea.
+    def compute_price_in_pricelist(self, items_lista):
+        for record in self:
+            for item in items_lista.item_ids:
+                if item.product_tmpl_id.name == record.product_id.name:
+                    record.price_in_pricelist = int(round(item.fixed_price))
+                if not record.price_in_pricelist:
+                    record.price_in_pricelist = 0
+            record.total_amount = record.quantity * record.price_in_pricelist
+
+
 
 class StockMoveLine(models.Model):
     _inherit = 'stock.move.line'
@@ -876,6 +909,18 @@ class StockMoveLine(models.Model):
         'Default Code Integer', 
         compute='_compute_default_code_integer', 
         store=True
+    )
+    price_in_pricelist = fields.Monetary(
+        string = "Price in pricelist",
+    )
+    total_amount = fields.Monetary(
+        string = "Total amount",
+    )
+    currency_id = fields.Many2one(
+        'res.currency',
+        related = 'picking_id.sale_id.currency_id',
+        string = 'Currency',
+        store = True
     )
 
 # ----------------------------------------------------------
@@ -891,3 +936,12 @@ class StockMoveLine(models.Model):
                 record.default_code_integer = int(record.product_id.default_code) if record.product_id.default_code else 0
             except (ValueError, TypeError):
                 record.default_code_integer = 0
+    
+    def compute_price_in_pricelist(self, items_lista):
+        for record in self:
+            for item in items_lista.item_ids:
+                if item.product_tmpl_id.name == record.product_id.name:
+                    record.price_in_pricelist = int(round(item.fixed_price))
+                if not record.price_in_pricelist:
+                    record.price_in_pricelist = 0
+            record.total_amount = record.quantity * record.price_in_pricelist
