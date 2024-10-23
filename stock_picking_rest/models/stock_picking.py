@@ -50,6 +50,10 @@ class StockPicking(models.Model):
         default=False,
         compute='_compute_send_button_visible',
     )
+    page_cg1_visible = fields.Boolean(
+        default=False,
+        compute='_compute_send_button_visible'
+    )
     endpoint = fields.Text(
         string='Endpoint',
         readonly=True
@@ -75,7 +79,10 @@ class StockPicking(models.Model):
         string='Is backorder',
         default=False
     )
-
+    cg1_response = fields.Text(
+        string='CG1 Response',
+        readonly=True
+    )
 # ------------------------------------------------------------------------------------------------
 # METODOS
 # ------------------------------------------------------------------------------------------------
@@ -238,21 +245,35 @@ class StockPicking(models.Model):
                 # Si la respuesta contiene "error" o "detail", se muestra un mensaje de error.
                 elif "error" in response_json or "detail" in response_json:
                     self.rfid_response = _("FAILED. Error in the response request.")
+                    body_mensaje = Markup(_(f'<h2>¡Envío Errado!</h2> <p>Hubo un error al enviar la información a CG1. Revise el detalle del error en la pestaña de Respuesta CG1.</p><br><p>Valide los parámetros del envío e intente de nuevo.</p>'))
+                    self.message_post(body=body_mensaje, message_type='notification')
                     self.ribbon_error = True
                     self.ribbon_visible = False
-                    self.response = response.text
+                    response_text = response.text
+                    response_json = json.loads(response_text)
+                    self.response = json.dumps(response_json, indent=4)
+                    self.cg1_response = response_text
                 # Si la respuesta no contiene "ok", "error" o "detail", se muestra un mensaje de error desconocido.
                 else:
                     self.rfid_response = _("FAILED. Unknown error in the response request.")
+                    body_mensaje = Markup(_(f'<h2>¡Envío Errado!</h2> <p>Hubo un error desconocido al enviar la información a CG1. Revise el detalle del error en la pestaña de Respuesta CG1.</p><br><p>Valide los parámetros del envío e intente de nuevo.</p>'))
+                    self.message_post(body=body_mensaje, message_type='notification')
                     self.ribbon_error = True
                     self.ribbon_visible = False
-                    self.response = response.text
+                    response_text = response.text
+                    response_json = json.loads(response_text)
+                    self.response = json.dumps(response_json, indent=4)
+                    self.cg1_response = response_text
             # Si hay un error al decodificar la respuesta, se muestra un mensaje de error.
             except json.JSONDecodeError:
                 self.rfid_response = _("FAILED. Error decoding the response.")
+                body_mensaje = Markup(_(f'<h2>¡Envío Errado!</h2> <p>Hubo un error al decodificar la respuesta de CG1. Revise el detalle del error en la pestaña de Respuesta CG1.</p><br><p>Valide los parámetros del envío e intente de nuevo.</p>'))
+                self.message_post(body=body_mensaje, message_type='notification')
                 self.ribbon_error = True
                 self.ribbon_visible = False
+                self.cg1_response = response.text
                 self.response = response.text
+
 
             # Se formatea el json generado para que sea más legible.
             cg1_json = json.dumps(cg1_json, indent=4)
@@ -442,6 +463,7 @@ class StockPicking(models.Model):
             record.send_button_visible = es_picking and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and es_sucursal
             record.packing_button_visible = es_packing and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and is_send_mode and es_sucursal
             record.cg1_button_visible = es_salida and record.state not in ('draft', 'confirmed', 'cancel', 'assigned') and self.rfid_response != "SUCCESS" and not record.ribbon_visible
+            record.page_cg1_visible = record.state == 'done' and es_salida
 
     # INFO: Método que calcula la cantidad total de productos en la orden de salida (Para el vale de entrega).
     @api.depends('state')
